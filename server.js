@@ -1,4 +1,5 @@
 require('dotenv').config();
+const PORT = process.env.PORT || 4000;
 const express = require('express');
 const multer = require('multer');
 const axios = require('axios');
@@ -234,6 +235,6 @@ app.post('/api/subir-firma', upload.single('archivoFirma'), (req, res) => {
     res.send(`<script>alert("Firma guardada en servidor"); window.location.href="/";</script>`);
 });
 
-app.listen(3000, () => {
-    console.log('🚀 Servidor Shukita v2 activo en http://localhost:3000');
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Servidor Shukita v2 disponible en puerto ${PORT}`);
 });

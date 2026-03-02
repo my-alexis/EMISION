@@ -1,5 +1,5 @@
 require('dotenv').config();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000; // Cambiado a 4000 para tu VPS
 const express = require('express');
 const multer = require('multer');
 const axios = require('axios');
@@ -30,7 +30,6 @@ if (!fsSync.existsSync(path.join(__dirname, 'public/images'))) {
 }
 
 // --- UTILIDADES DE IMÁGENES (CONVERSIÓN A BASE64) ---
-
 const getImagenBase64 = (nombreArchivo) => {
     try {
         const ruta = path.join(process.cwd(), 'public/images', nombreArchivo);
@@ -58,11 +57,8 @@ const formatearFecha = (fechaISO) => {
 
 // --- RENDERIZADO DE CERTIFICADO ---
 function renderizarCertificado(app, datos) {
-    // Cargamos recursos fijos del servidor
     const logoSrc = getImagenBase64('logoNH.png');
     const firmaFijaSrc = getImagenBase64('firma_juan.png');
-
-    // CORRECCIÓN AQUÍ: Usamos fsSync en lugar de fs
     const fondoPath = path.join(__dirname, 'public', 'images', 'fondo_certificado.png');
     const fondoBase64 = fsSync.readFileSync(fondoPath, { encoding: 'base64' });
     const fondoSrc = `data:image/png;base64,${fondoBase64}`;
@@ -79,7 +75,6 @@ function renderizarCertificado(app, datos) {
             logoSrc: logoSrc,
             firmaFijaSrc: firmaFijaSrc,
             fondoSrc,
-            // La firma manual viene desde el cliente (index.ejs)
             firmaDocenteSrc: datos.firmaManual || ""
         }, (err, html) => {
             if (err) return reject(err);
@@ -126,9 +121,11 @@ app.get('/', (req, res) => {
 app.post('/buscar', async (req, res) => {
     const { cursoId } = req.body;
     try {
+        // 1. Obtener datos básicos del curso
         const resCurso = await axios.get(`${DOMINIO}/api/v3/courses/${cursoId}?api_key=${API_KEY}`);
         const c = resCurso.data;
 
+        // 2. Obtener Instructor
         let nombreDocente = "POR ASIGNAR";
         try {
             const resIns = await axios.get(`${DOMINIO}/api/v3/courses/${cursoId}/instructors?api_key=${API_KEY}`);
@@ -139,25 +136,51 @@ app.post('/buscar', async (req, res) => {
             }
         } catch (_) { }
 
-        const resAlu = await axios.get(
-            `${DOMINIO}/api/v3/courses/${cursoId}/learners?api_key=${API_KEY}&$include=user&$limit=100`
-        );
-        const alumnos = resAlu.data
-            .map((item, i) => ({
-                codigo: `NH-${cursoId}-${(i + 1).toString().padStart(2, '0')}`,
-                nombre: `${item.user.last_name} ${item.user.first_name}`.toUpperCase()
-            }))
-            .sort((a, b) => a.nombre.localeCompare(b.nombre));
+        // 3. Obtener TODOS los alumnos con Paginación (Soporta más de 100)
+        let todosLosAlumnos = [];
+        let offset = 0;
+        const limit = 100;
+        let hayMasPags = true;
+
+        while (hayMasPags) {
+            const resAlu = await axios.get(
+                `${DOMINIO}/api/v3/courses/${cursoId}/learners?api_key=${API_KEY}&$include=user&$limit=${limit}&$offset=${offset}`
+            );
+
+            if (resAlu.data && resAlu.data.length > 0) {
+                const listaMapeada = resAlu.data.map(item => ({
+                    nombre: `${item.user.last_name} ${item.user.first_name}`.toUpperCase()
+                }));
+                
+                todosLosAlumnos = todosLosAlumnos.concat(listaMapeada);
+                
+                if (resAlu.data.length < limit) {
+                    hayMasPags = false;
+                } else {
+                    offset += limit;
+                }
+            } else {
+                hayMasPags = false;
+            }
+        }
+
+        // 4. Ordenar alfabéticamente y asignar código NH
+        todosLosAlumnos.sort((a, b) => a.nombre.localeCompare(b.nombre));
+        
+        const alumnosFinal = todosLosAlumnos.map((alu, i) => ({
+            ...alu,
+            codigo: `NH-${cursoId}-${(i + 1).toString().padStart(3, '0')}` // padStart(3) para manejar > 100
+        }));
 
         res.render('index', {
-            alumnos,
+            alumnos: alumnosFinal,
             cursoNombre: c.name,
             docenteNombre: nombreDocente,
             fechaInicio: formatearFecha(c.start_at),
             fechaFin: formatearFecha(c.finish_at),
             creditos: c.credits || "0",
             cursoId,
-            total: alumnos.length
+            total: alumnosFinal.length
         });
     } catch (e) {
         console.error(e.message);
@@ -165,13 +188,11 @@ app.post('/buscar', async (req, res) => {
     }
 });
 
-// Ruta para generar PDF Individual
 app.post('/api/generar-pdf-individual', async (req, res) => {
     try {
-        const datos = req.body; // Aquí ya viene firmaManual si se subió en el index
+        const datos = req.body;
         const html = await renderizarCertificado(app, datos);
         const pdf = await generarPDF(html);
-
         const archivo = nombreArchivoSeguro(datos.nombre, datos.codigo);
         await fs.writeFile(path.join(CARPETA_CERTIFICADOS, archivo), pdf);
 
@@ -184,7 +205,6 @@ app.post('/api/generar-pdf-individual', async (req, res) => {
     }
 });
 
-// Ruta para generar por Lote
 app.post('/api/generar-lote', async (req, res) => {
     const { alumnos, cursoNombre, docenteNombre, fechaInicio, fechaFin, creditos, firmaManual } = req.body;
     if (!alumnos || alumnos.length === 0) return res.status(400).json({ error: 'Sin alumnos.' });
@@ -200,7 +220,7 @@ app.post('/api/generar-lote', async (req, res) => {
                 inicio: fechaInicio,
                 fin: fechaFin,
                 creditos,
-                firmaManual // Se aplica la misma firma a todo el lote
+                firmaManual
             };
             const html = await renderizarCertificado(app, datos);
             const pdf = await generarPDF(html);
@@ -214,17 +234,11 @@ app.post('/api/generar-lote', async (req, res) => {
     res.json({ mensaje: "Proceso completado", resultados });
 });
 
-// --- GESTIÓN DE SUBIDA DE FIRMAS FIJAS (OPCIONAL) ---
 const storage = multer.diskStorage({
     destination: (req, file, cb) => cb(null, 'public/images/'),
     filename: (req, file, cb) => {
-        // 1. Limpiamos el nombre del docente
         const nombreDocente = req.body.nombreDocenteFirma.replace(/\s+/g, '_').toUpperCase();
-
-        // 2. Extraemos la extensión original del archivo (.png, .jpg, .jpeg)
         const extension = path.extname(file.originalname).toLowerCase();
-
-        // 3. Concatenamos todo
         cb(null, `firma_${nombreDocente}${extension}`);
     }
 });

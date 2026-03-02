@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics IT Dashboard - New Horizons Peru</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-blue: #004a99;
+            --secondary-blue: #0066cc;
+            --light-gray: #f8f9fa;
+            --border-color: #e0e0e0;
+        }
+        
+        body { 
+            background: var(--light-gray); 
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+        
+        .kpi-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border-left: 4px solid var(--primary-blue);
+            transition: transform 0.2s;
+        }
+        
+        .kpi-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        }
+        
+        .kpi-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+            line-height: 1;
+        }
+        
+        .kpi-label {
+            font-size: 0.875rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 8px;
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+        
+        .filter-panel {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 20px;
+        }
+        
+        .btn-filter {
+            width: 100%;
+            text-align: left;
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            border: 1px solid var(--border-color);
+            background: white;
+            transition: all 0.2s;
+        }
+        
+        .btn-filter:hover {
+            background: #f0f7ff;
+            border-color: var(--primary-blue);
+        }
+        
+        .btn-filter.active {
+            background: var(--primary-blue);
+            color: white;
+            border-color: var(--primary-blue);
+        }
+        
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .badge-finalizado { background: #d4edda; color: #155724; }
+        .badge-por-finalizar { background: #fff3cd; color: #856404; }
+        
+        .table-dashboard {
+            font-size: 0.9rem;
+        }
+        
+        .table-dashboard th {
+            background: var(--light-gray);
+            font-weight: 600;
+            border-bottom: 2px solid var(--primary-blue);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .progress-custom {
+            height: 8px;
+            border-radius: 10px;
+        }
+        
+        .comment-box {
+            background: #f8f9fa;
+            border-left: 3px solid var(--secondary-blue);
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            font-size: 0.875rem;
+        }
+        
+        .header-dashboard {
+            background: linear-gradient(135deg, #004a99 0%, #0066cc 100%);
+            color: white;
+            padding: 25px 0;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .alert-custom {
+            border-radius: 10px;
+            border: none;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header-dashboard">
+    <div class="container-fluid px-4">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h3 class="mb-1">📊 Quality Analytics Dashboard 2026</h3>
+                <p class="mb-0 opacity-75">Panel de Control de Calidad y Satisfacción | <%= stats.fechaActual %></p>
+            </div>
+            <div class="col-md-4 text-end">
+                <span class="badge bg-light text-dark me-2">
+                    Filtro: <%= filtroEstado === 'TODOS' ? 'Todos los Activos' : filtroEstado.replace('_', ' ') %>
+                </span>
+                <a href="/" class="btn btn-outline-light btn-sm">← Certificados</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid px-4">
+    <!-- KPIs Principales -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="kpi-card">
+                <div class="kpi-value"><%= stats.totalCursos %></div>
+                <div class="kpi-label">📚 Cursos Activos</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="kpi-card">
+                <div class="kpi-value"><%= stats.totalInscritos %></div>
+                <div class="kpi-label">👥 Alumnos Totales</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="kpi-card">
+                <div class="kpi-value"><%= stats.totalEncuestas %></div>
+                <div class="kpi-label">📝 Respuestas Recibidas</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="kpi-card">
+                <div class="kpi-value"><%= stats.promedioSatisfaccion %> <small style="font-size: 1rem;">/ 5.0</small></div>
+                <div class="kpi-label">⭐ Satisfacción General</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Panel de Filtros -->
+        <div class="col-md-3">
+            <div class="filter-panel">
+                <h6 class="fw-bold mb-3">🎯 FILTROS</h6>
+                
+                <label class="form-label small text-muted mb-2">Estado del Curso</label>
+                <form action="/dashboard" method="GET" id="filterForm">
+                    <input type="hidden" name="id" value="<%= filtroId %>">
+                    
+                    <button type="submit" name="estado" value="TODOS" 
+                            class="btn btn-filter <%= filtroEstado === 'TODOS' ? 'active' : '' %>">
+                        📊 Todos los Activos
+                    </button>
+                    
+                    <button type="submit" name="estado" value="POR_FINALIZAR" 
+                            class="btn btn-filter <%= filtroEstado === 'POR_FINALIZAR' ? 'active' : '' %>">
+                        ⏰ Por Finalizar (<%= stats.cursosPorFinalizar %>)
+                    </button>
+                    
+                    <button type="submit" name="estado" value="FINALIZADO" 
+                            class="btn btn-filter <%= filtroEstado === 'FINALIZADO' ? 'active' : '' %>">
+                        ✅ Finalizados (<%= stats.cursosFinalizados %>)
+                    </button>
+                    
+                    <button type="submit" name="estado" value="EN_CURSO" 
+                            class="btn btn-filter <%= filtroEstado === 'EN_CURSO' ? 'active' : '' %>">
+                        🎓 En Curso (<%= stats.cursosEnCurso %>)
+                    </button>
+                </form>
+                
+                <hr class="my-3">
+                
+                <label class="form-label small text-muted mb-2">Buscar por ID de Curso</label>
+                <form action="/dashboard" method="GET">
+                    <input type="hidden" name="estado" value="<%= filtroEstado %>">
+                    <div class="input-group input-group-sm">
+                        <input type="text" name="id" class="form-control" 
+                               placeholder="Ej: 1726324" value="<%= filtroId %>">
+                        <button class="btn btn-primary" type="submit">🔍</button>
+                    </div>
+                </form>
+                
+                <% if (filtroId) { %>
+                <a href="/dashboard?estado=<%= filtroEstado %>" class="btn btn-sm btn-outline-secondary w-100 mt-2">
+                    ✖ Limpiar filtro ID
+                </a>
+                <% } %>
+                
+                <hr class="my-4">
+                
+                <div class="alert alert-info alert-custom small mb-0">
+                    <strong>💡 Información</strong>
+                    <p class="mb-1 mt-2">Dashboard de cursos 2026 que ya iniciaron.</p>
+                    <p class="mb-0"><strong>Total en vista:</strong> <%= datos.length %> curso(s)</p>
+                    <hr class="my-2">
+                    <small class="text-muted">
+                        ⏰ Por finalizar: <%= stats.cursosPorFinalizar %><br>
+                        ✅ Finalizados: <%= stats.cursosFinalizados %><br>
+                        🎓 En curso: <%= stats.cursosEnCurso %>
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contenido Principal -->
+        <div class="col-md-9">
+            
+            <% if (datos.length === 0) { %>
+                <!-- Mensaje cuando no hay datos -->
+                <div class="chart-container">
+                    <div class="alert alert-warning alert-custom text-center">
+                        <h4>⚠️ No hay cursos que mostrar</h4>
+                        <p class="mb-0">No se encontraron cursos finalizados o por finalizar con los filtros aplicados.</p>
+                        <% if (filtroId) { %>
+                            <hr>
+                            <a href="/dashboard?estado=<%= filtroEstado %>" class="btn btn-primary mt-2">Ver todos los cursos</a>
+                        <% } %>
+                    </div>
+                </div>
+            <% } else { %>
+            
+            <!-- Gráfico Principal -->
+            <div class="chart-container">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0" id="chartTitle">📊 Análisis Comparativo por Curso</h5>
+                    <div class="btn-group btn-group-sm" role="group">
+                        <input type="radio" class="btn-check" name="metrica" id="m1" value="inscritos" checked>
+                        <label class="btn btn-outline-primary" for="m1">👥 Inscritos</label>
+
+                        <input type="radio" class="btn-check" name="metrica" id="m2" value="encuestas">
+                        <label class="btn btn-outline-primary" for="m2">📝 Respuestas</label>
+
+                        <input type="radio" class="btn-check" name="metrica" id="m3" value="satisfaccion">
+                        <label class="btn btn-outline-primary" for="m3">⭐ Satisfacción</label>
+                    </div>
+                </div>
+                <div style="height: 350px; position: relative;">
+                    <canvas id="mainChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Gráfico Radar -->
+            <div class="chart-container">
+                <h5 class="fw-bold mb-3">📈 Promedios por Categoría de Evaluación</h5>
+                <div style="height: 280px; position: relative;">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Tabla Detallada -->
+            <div class="chart-container">
+                <h5 class="fw-bold mb-3">📋 Tabla Detallada de Cursos</h5>
+                
+                <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+                    <table class="table table-hover table-dashboard">
+                        <thead>
+                            <tr>
+                                <th style="min-width: 80px;">ID</th>
+                                <th style="min-width: 250px;">Curso</th>
+                                <th style="min-width: 140px;">Estado</th>
+                                <th>Inscritos</th>
+                                <th>Respuestas</th>
+                                <th style="min-width: 100px;">Tasa</th>
+                                <th>Objetivos</th>
+                                <th>Aula</th>
+                                <th>Acompañamiento</th>
+                                <th style="min-width: 130px;">Fechas</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% datos.forEach(d => { 
+                                const badgeClass = {
+                                    'FINALIZADO': 'badge-finalizado',
+                                    'POR_FINALIZAR': 'badge-por-finalizar',
+                                    'EN_CURSO': 'badge-en-curso'
+                                };
+                                
+                                // Calcular días restantes
+                                let diasRestantes = '';
+                                if (d.estado === 'POR_FINALIZAR') {
+                                    const [dia, mes, año] = d.fin.split('/');
+                                    const fechaFin = new Date(año, mes - 1, dia);
+                                    const hoy = new Date();
+                                    const diff = Math.ceil((fechaFin - hoy) / (1000 * 60 * 60 * 24));
+                                    diasRestantes = ` (${diff} días)`;
+                                }
+                            %>
+                            <tr>
+                                <td><code class="text-primary"><%= d.id %></code></td>
+                                <td>
+                                    <strong class="d-block"><%= d.nombre %></strong>
+                                    <small class="text-muted">ID: <%= d.id %></small>
+                                </td>
+                                <td>
+                                    <span class="status-badge <%= badgeClass[d.estado] %>">
+                                        <%= d.estado.replace('_', ' ') %><%= diasRestantes %>
+                                    </span>
+                                </td>
+                                <td class="text-center"><strong><%= d.inscritos %></strong></td>
+                                <td class="text-center">
+                                    <span class="badge <%= d.encuestas > 0 ? 'bg-primary' : 'bg-secondary' %>">
+                                        <%= d.encuestas %>
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="progress progress-custom">
+                                        <div class="progress-bar <%= d.tasaRespuesta >= 50 ? 'bg-success' : 'bg-warning' %>" 
+                                             style="width: <%= d.tasaRespuesta %>%">
+                                        </div>
+                                    </div>
+                                    <small class="text-muted"><%= d.tasaRespuesta %>%</small>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-<%= parseFloat(d.detalles.objetivos) >= 4 ? 'success' : parseFloat(d.detalles.objetivos) >= 3 ? 'warning' : 'danger' %>">
+                                        <%= d.detalles.objetivos %>
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-<%= parseFloat(d.detalles.aula) >= 4 ? 'success' : parseFloat(d.detalles.aula) >= 3 ? 'warning' : 'danger' %>">
+                                        <%= d.detalles.aula %>
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-<%= parseFloat(d.detalles.acompanamiento) >= 4 ? 'success' : parseFloat(d.detalles.acompanamiento) >= 3 ? 'warning' : 'danger' %>">
+                                        <%= d.detalles.acompanamiento %>
+                                    </span>
+                                </td>
+                                <td class="small" style="white-space: nowrap;">
+                                    <div><strong>📅 <%= d.inicio %></strong></div>
+                                    <div class="text-muted">📍 <%= d.fin %></div>
+                                </td>
+                            </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Comentarios -->
+            <% if (comentarios.length > 0) { %>
+            <div class="chart-container">
+                <h5 class="fw-bold mb-3">💬 Últimos Comentarios de Estudiantes</h5>
+                <div style="max-height: 400px; overflow-y: auto;">
+                    <% comentarios.forEach(c => { %>
+                        <div class="comment-box">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <strong class="text-primary">Curso ID: <%= c.cursoId %></strong>
+                                <small class="text-muted"><%= c.cursoNombre.substring(0, 50) %>...</small>
+                            </div>
+                            <p class="mb-0">"<%= c.comentario %>"</p>
+                        </div>
+                    <% }); %>
+                </div>
+            </div>
+            <% } %>
+            
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<script>
+    const datosCompletos = <%- JSON.stringify(datos) %>;
+    
+    if (datosCompletos.length > 0) {
+        Chart.defaults.font.family = "'Segoe UI', Tahoma, sans-serif";
+        Chart.defaults.color = '#666';
+        
+        // GRÁFICO PRINCIPAL
+        const ctx = document.getElementById('mainChart').getContext('2d');
+        let mainChart;
+
+        function renderMainChart(metrica) {
+            const labels = datosCompletos.map(d => {
+                const nombre = d.nombre.length > 30 ? d.nombre.substring(0, 30) + '...' : d.nombre;
+                return `${nombre} (${d.id})`;
+            });
+            
+            let values = [];
+            let labelTag = "";
+            let backgroundColor = [];
+            
+            if (metrica === 'inscritos') {
+                values = datosCompletos.map(d => d.inscritos);
+                labelTag = "Total Alumnos Inscritos";
+                backgroundColor = datosCompletos.map(d => d.encuestas > 0 ? '#004a99' : '#cccccc');
+            } else if (metrica === 'encuestas') {
+                values = datosCompletos.map(d => d.encuestas);
+                labelTag = "Respuestas de Encuestas";
+                backgroundColor = '#0066cc';
+            } else if (metrica === 'satisfaccion') {
+                values = datosCompletos.map(d => parseFloat(d.satisfaccion));
+                labelTag = "Puntaje de Satisfacción (1-5)";
+                backgroundColor = datosCompletos.map(d => {
+                    const val = parseFloat(d.satisfaccion);
+                    if (val >= 4.5) return '#28a745';
+                    if (val >= 4.0) return '#5bc0de';
+                    if (val >= 3.0) return '#ffc107';
+                    return '#dc3545';
+                });
+            }
+
+            if (mainChart) mainChart.destroy();
+
+            mainChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: labelTag,
+                        data: values,
+                        backgroundColor: backgroundColor,
+                        borderRadius: 6,
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(0,0,0,0.8)',
+                            padding: 12,
+                            titleFont: { size: 14, weight: 'bold' },
+                            bodyFont: { size: 13 }
+                        }
+                    },
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            grid: { color: 'rgba(0,0,0,0.05)' },
+                            ticks: { font: { size: 11 } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { 
+                                font: { size: 9 },
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // GRÁFICO DE CATEGORÍAS
+        const ctxCategory = document.getElementById('categoryChart').getContext('2d');
+        
+        function renderCategoryChart() {
+            const promedios = {
+                objetivos: 0,
+                aula: 0,
+                metodologia: 0,
+                recomendacion: 0,
+                acompanamiento: 0
+            };
+            
+            const count = datosCompletos.filter(d => d.encuestas > 0).length;
+            
+            if (count > 0) {
+                datosCompletos.forEach(d => {
+                    if (d.encuestas > 0) {
+                        promedios.objetivos += parseFloat(d.detalles.objetivos);
+                        promedios.aula += parseFloat(d.detalles.aula);
+                        promedios.metodologia += parseFloat(d.detalles.metodologia);
+                        promedios.recomendacion += parseFloat(d.detalles.recomendacion);
+                        promedios.acompanamiento += parseFloat(d.detalles.acompanamiento);
+                    }
+                });
+                
+                Object.keys(promedios).forEach(key => {
+                    promedios[key] = (promedios[key] / count).toFixed(2);
+                });
+            }
+            
+            new Chart(ctxCategory, {
+                type: 'radar',
+                data: {
+                    labels: ['🎯 Objetivos', '💻 Aula Virtual', '📚 Metodología', '👍 Recomendación', '🤝 Acompañamiento'],
+                    datasets: [{
+                        label: 'Promedio General',
+                        data: Object.values(promedios),
+                        backgroundColor: 'rgba(0, 74, 153, 0.2)',
+                        borderColor: '#004a99',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#004a99',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#004a99',
+                        pointRadius: 5,
+                        pointHoverRadius: 7
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 5,
+                            ticks: { 
+                                stepSize: 1,
+                                font: { size: 11 }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Event listeners
+        document.querySelectorAll('input[name="metrica"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                renderMainChart(e.target.value);
+                const titles = {
+                    'inscritos': '📊 Inscritos por Curso',
+                    'encuestas': '📝 Respuestas por Curso',
+                    'satisfaccion': '⭐ Satisfacción por Curso'
+                };
+                document.getElementById('chartTitle').innerText = titles[e.target.value];
+            });
+        });
+
+        // Renderizado inicial
+        renderMainChart('inscritos');
+        renderCategoryChart();
+    }
+</script>
+
+</body>
+</html>

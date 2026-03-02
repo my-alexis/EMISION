@@ -1,0 +1,61 @@
+{
+  "campos": [
+    {
+      "id": "nombreAlumno",
+      "label": "Nombre del Alumno",
+      "habilitado": true,
+      "obligatorio": true,
+      "valor": ""
+    },
+    {
+      "id": "nombreCurso",
+      "label": "Nombre del Curso",
+      "habilitado": true,
+      "obligatorio": true,
+      "valor": ""
+    },
+    {
+      "id": "creditos",
+      "label": "Horas Académicas",
+      "habilitado": true,
+      "obligatorio": false,
+      "valor": ""
+    },
+    {
+      "id": "inicio",
+      "label": "Fecha Inicio",
+      "habilitado": true,
+      "obligatorio": false,
+      "valor": ""
+    },
+    {
+      "id": "fin",
+      "label": "Fecha Fin",
+      "habilitado": true,
+      "obligatorio": false,
+      "valor": ""
+    },
+    {
+      "id": "nombreDocente",
+      "label": "Instructor",
+      "habilitado": true,
+      "obligatorio": false,
+      "valor": ""
+    },
+    {
+      "id": "codigoNH",
+      "label": "Código de Certificación",
+      "habilitado": true,
+      "obligatorio": false,
+      "valor": ""
+    },
+    {
+      "id": "custom_1769445177773",
+      "label": "IMAGEN FIRMA",
+      "habilitado": true,
+      "obligatorio": false,
+      "valor": "",
+      "personalizado": true
+    }
+  ]
+}

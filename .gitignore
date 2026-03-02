@@ -1,0 +1,14 @@
+# Dependencias (NUNCA subir esto)
+node_modules/
+
+# Variables de entorno (Contienen claves secretas)
+.env
+
+# Archivos generados localmente
+certificados_generados/
+*.pdf
+
+# Archivos del sistema y editores
+.DS_Store
+.vscode/
+npm-debug.log*

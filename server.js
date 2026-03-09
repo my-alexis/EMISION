@@ -1,5 +1,5 @@
 require('dotenv').config();
-const PORT = process.env.PORT || 3000; // Cambiado a 4000 para tu VPS
+const PORT = process.env.PORT || 3000;
 const express = require('express');
 const multer = require('multer');
 const axios = require('axios');
@@ -10,7 +10,6 @@ const fsSync = require('fs');
 
 const app = express();
 app.use(express.static('public'));
-// Aumentamos el límite para permitir el envío de imágenes en Base64 (firmas)
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.set('view engine', 'ejs');
@@ -21,7 +20,6 @@ const API_KEY = 'c602f00b4dafe00e89fabb34a53862d49d4ae0947fe8323b96c7';
 const DOMINIO = 'https://newhorizonsperu.matrixlms.com';
 const CARPETA_CERTIFICADOS = path.join(__dirname, 'certificados_generados');
 
-// Crear carpetas necesarias si no existen
 if (!fsSync.existsSync(CARPETA_CERTIFICADOS)) {
     fsSync.mkdirSync(CARPETA_CERTIFICADOS, { recursive: true });
 }
@@ -29,7 +27,7 @@ if (!fsSync.existsSync(path.join(__dirname, 'public/images'))) {
     fsSync.mkdirSync(path.join(__dirname, 'public/images'), { recursive: true });
 }
 
-// --- UTILIDADES DE IMÁGENES (CONVERSIÓN A BASE64) ---
+// --- UTILIDADES ---
 const getImagenBase64 = (nombreArchivo) => {
     try {
         const ruta = path.join(process.cwd(), 'public/images', nombreArchivo);
@@ -43,7 +41,6 @@ const getImagenBase64 = (nombreArchivo) => {
     return "";
 };
 
-// --- FORMATEO DE FECHAS ---
 const formatearFecha = (fechaISO) => {
     if (!fechaISO || fechaISO === "No definida") return "---";
     const fecha = new Date(fechaISO);
@@ -53,6 +50,15 @@ const formatearFecha = (fechaISO) => {
         year: 'numeric',
         timeZone: 'UTC'
     }).format(fecha);
+};
+
+// Fecha de hoy en formato largo español
+const getFechaHoy = () => {
+    return new Intl.DateTimeFormat('es-PE', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+    }).format(new Date());
 };
 
 // --- RENDERIZADO DE CERTIFICADO ---
@@ -68,12 +74,13 @@ function renderizarCertificado(app, datos) {
             nombreAlumno: datos.nombre,
             nombreCurso: datos.curso,
             creditos: datos.creditos,
+            tipoHoras: datos.tipoHoras || 'académicas',
             inicio: datos.inicio,
             fin: datos.fin,
             nombreDocente: datos.docente,
             codigoNH: datos.codigo,
-            logoSrc: logoSrc,
-            firmaFijaSrc: firmaFijaSrc,
+            logoSrc,
+            firmaFijaSrc,
             fondoSrc,
             firmaDocenteSrc: datos.firmaManual || ""
         }, (err, html) => {
@@ -83,8 +90,36 @@ function renderizarCertificado(app, datos) {
     });
 }
 
+// --- RENDERIZADO DE CONSTANCIA ---
+function renderizarConstancia(app, datos) {
+    const firmaFijaSrc = getImagenBase64('firma_jose.png'); // Firma del gerente
+    const fondoPath = path.join(__dirname, 'public', 'images', 'fondo_constancia.png');
+    const fondoBase64 = fsSync.readFileSync(fondoPath, { encoding: 'base64' });
+    const fondoSrc = `data:image/png;base64,${fondoBase64}`;
+
+    return new Promise((resolve, reject) => {
+        app.render('constancia', {
+            nombreAlumno: datos.nombre,
+            nombreCurso: datos.curso,
+            creditos: datos.creditos,
+            tipoHoras: datos.tipoHoras || 'académicas',
+            inicio: datos.inicio,
+            fin: datos.fin,
+            nombreDocente: datos.docente,
+            codigoNH: datos.codigo,
+            firmaFijaSrc,
+            fondoSrc,
+            firmaDocenteSrc: datos.firmaManual || "",
+            fechaEmision: getFechaHoy()
+        }, (err, html) => {
+            if (err) return reject(err);
+            resolve(html);
+        });
+    });
+}
+
 // --- GENERACIÓN DE PDF CON PUPPETEER ---
-async function generarPDF(html) {
+async function generarPDF(html, orientacion = 'landscape') {
     const browser = await puppeteer.launch({
         headless: 'new',
         args: ['--no-sandbox', '--disable-setuid-sandbox']
@@ -94,7 +129,7 @@ async function generarPDF(html) {
         await page.setContent(html, { waitUntil: 'networkidle0' });
         const pdf = await page.pdf({
             format: 'A4',
-            landscape: true,
+            landscape: orientacion === 'landscape',
             printBackground: true
         });
         return pdf;
@@ -103,9 +138,9 @@ async function generarPDF(html) {
     }
 }
 
-function nombreArchivoSeguro(nombre, codigo) {
+function nombreArchivoSeguro(nombre, codigo, prefijo = 'Certificado') {
     const limpio = nombre.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s]/g, '').replace(/\s+/g, '_');
-    return `Certificado_${limpio}_${codigo}.pdf`;
+    return `${prefijo}_${limpio}_${codigo}.pdf`;
 }
 
 // --- RUTAS ---
@@ -113,7 +148,8 @@ function nombreArchivoSeguro(nombre, codigo) {
 app.get('/', (req, res) => {
     res.render('index', {
         alumnos: [], cursoNombre: null, docenteNombre: null,
-        fechaInicio: null, fechaFin: null, creditos: null,
+        fechaInicio: null, fechaFin: null,
+        horasAcademicas: null, horasCronologicas: null,
         cursoId: '', total: 0
     });
 });
@@ -121,11 +157,9 @@ app.get('/', (req, res) => {
 app.post('/buscar', async (req, res) => {
     const { cursoId } = req.body;
     try {
-        // 1. Obtener datos básicos del curso
         const resCurso = await axios.get(`${DOMINIO}/api/v3/courses/${cursoId}?api_key=${API_KEY}`);
         const c = resCurso.data;
 
-        // 2. Obtener Instructor
         let nombreDocente = "POR ASIGNAR";
         try {
             const resIns = await axios.get(`${DOMINIO}/api/v3/courses/${cursoId}/instructors?api_key=${API_KEY}`);
@@ -136,7 +170,6 @@ app.post('/buscar', async (req, res) => {
             }
         } catch (_) { }
 
-        // 3. Obtener TODOS los alumnos con Paginación (Soporta más de 100)
         let todosLosAlumnos = [];
         let offset = 0;
         const limit = 100;
@@ -146,14 +179,11 @@ app.post('/buscar', async (req, res) => {
             const resAlu = await axios.get(
                 `${DOMINIO}/api/v3/courses/${cursoId}/learners?api_key=${API_KEY}&$include=user&$limit=${limit}&$offset=${offset}`
             );
-
             if (resAlu.data && resAlu.data.length > 0) {
                 const listaMapeada = resAlu.data.map(item => ({
                     nombre: `${item.user.last_name} ${item.user.first_name}`.toUpperCase()
                 }));
-                
                 todosLosAlumnos = todosLosAlumnos.concat(listaMapeada);
-                
                 if (resAlu.data.length < limit) {
                     hayMasPags = false;
                 } else {
@@ -164,12 +194,10 @@ app.post('/buscar', async (req, res) => {
             }
         }
 
-        // 4. Ordenar alfabéticamente y asignar código NH
         todosLosAlumnos.sort((a, b) => a.nombre.localeCompare(b.nombre));
-        
         const alumnosFinal = todosLosAlumnos.map((alu, i) => ({
             ...alu,
-            codigo: `NH-${cursoId}-${(i + 1).toString().padStart(3, '0')}` // padStart(3) para manejar > 100
+            codigo: `NH-${cursoId}-${(i + 1).toString().padStart(3, '0')}`
         }));
 
         res.render('index', {
@@ -178,7 +206,8 @@ app.post('/buscar', async (req, res) => {
             docenteNombre: nombreDocente,
             fechaInicio: formatearFecha(c.start_at),
             fechaFin: formatearFecha(c.finish_at),
-            creditos: c.credits || "0",
+            horasAcademicas: c.section_code || "0",
+            horasCronologicas: c.credits  || "0",
             cursoId,
             total: alumnosFinal.length
         });
@@ -188,14 +217,14 @@ app.post('/buscar', async (req, res) => {
     }
 });
 
+// --- GENERAR CERTIFICADO INDIVIDUAL ---
 app.post('/api/generar-pdf-individual', async (req, res) => {
     try {
         const datos = req.body;
         const html = await renderizarCertificado(app, datos);
-        const pdf = await generarPDF(html);
-        const archivo = nombreArchivoSeguro(datos.nombre, datos.codigo);
+        const pdf = await generarPDF(html, 'landscape');
+        const archivo = nombreArchivoSeguro(datos.nombre, datos.codigo, 'Certificado');
         await fs.writeFile(path.join(CARPETA_CERTIFICADOS, archivo), pdf);
-
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename="${archivo}"`);
         res.send(pdf);
@@ -205,11 +234,31 @@ app.post('/api/generar-pdf-individual', async (req, res) => {
     }
 });
 
+// --- GENERAR CONSTANCIA INDIVIDUAL ---
+app.post('/api/generar-pdf-individual-constancia', async (req, res) => {
+    try {
+        const datos = req.body;
+        const html = await renderizarConstancia(app, datos);
+        const pdf = await generarPDF(html, 'portrait');
+        const archivo = nombreArchivoSeguro(datos.nombre, datos.codigo, 'Constancia');
+        await fs.writeFile(path.join(CARPETA_CERTIFICADOS, archivo), pdf);
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${archivo}"`);
+        res.send(pdf);
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ error: 'Error al generar constancia: ' + e.message });
+    }
+});
+
+// --- GENERAR LOTE (certificados o constancias) ---
 app.post('/api/generar-lote', async (req, res) => {
-    const { alumnos, cursoNombre, docenteNombre, fechaInicio, fechaFin, creditos, firmaManual } = req.body;
+    const { alumnos, cursoNombre, docenteNombre, fechaInicio, fechaFin, creditos, firmaManual, tipo } = req.body;
     if (!alumnos || alumnos.length === 0) return res.status(400).json({ error: 'Sin alumnos.' });
 
+    const esConstancia = tipo === 'constancia';
     const resultados = [];
+
     for (const alumno of alumnos) {
         try {
             const datos = {
@@ -220,11 +269,14 @@ app.post('/api/generar-lote', async (req, res) => {
                 inicio: fechaInicio,
                 fin: fechaFin,
                 creditos,
-                firmaManual
+                firmaManual: esConstancia ? "" : firmaManual
             };
-            const html = await renderizarCertificado(app, datos);
-            const pdf = await generarPDF(html);
-            const archivo = nombreArchivoSeguro(alumno.nombre, alumno.codigo);
+            const html = esConstancia
+                ? await renderizarConstancia(app, datos)
+                : await renderizarCertificado(app, datos);
+            const pdf = await generarPDF(html, esConstancia ? 'portrait' : 'landscape');
+            const prefijo = esConstancia ? 'Constancia' : 'Certificado';
+            const archivo = nombreArchivoSeguro(alumno.nombre, alumno.codigo, prefijo);
             await fs.writeFile(path.join(CARPETA_CERTIFICADOS, archivo), pdf);
             resultados.push({ nombre: alumno.nombre, estado: 'ok' });
         } catch (e) {
@@ -234,6 +286,7 @@ app.post('/api/generar-lote', async (req, res) => {
     res.json({ mensaje: "Proceso completado", resultados });
 });
 
+// --- SUBIR FIRMA ---
 const storage = multer.diskStorage({
     destination: (req, file, cb) => cb(null, 'public/images/'),
     filename: (req, file, cb) => {
@@ -242,7 +295,7 @@ const storage = multer.diskStorage({
         cb(null, `firma_${nombreDocente}${extension}`);
     }
 });
-const upload = multer({ storage: storage });
+const upload = multer({ storage });
 
 app.post('/api/subir-firma', upload.single('archivoFirma'), (req, res) => {
     if (!req.file) return res.status(400).send('No se subió archivo.');

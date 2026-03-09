@@ -39,6 +39,16 @@
             justify-content: center; background: #fafafa; transition: 0.3s;
         }
         #imgPreview { max-height: 70px; display: none; }
+
+        /* Selector de tipo de documento */
+        .tipo-selector .btn-check:checked + .btn-outline-primary {
+            background-color: #1a237e; color: white; border-color: #1a237e;
+        }
+        .tipo-selector .btn-check:checked + .btn-outline-warning {
+            background-color: #e67e22; color: white; border-color: #e67e22;
+        }
+        .tipo-badge-certificado { background: #1a237e; color: white; }
+        .tipo-badge-constancia  { background: #e67e22; color: white; }
     </style>
 </head>
 
@@ -78,16 +88,71 @@
                         <i class="bi bi-check-lg"></i>
                     </button>
                 </div>
-
                 <div class="mt-2">
                     <span class="info-pill"><i class="bi bi-person-fill me-1"></i><%= docenteNombre %></span>
                     <span class="info-pill"><i class="bi bi-calendar-range me-1"></i><%= fechaInicio %> — <%= fechaFin %></span>
-                    <span class="info-pill"><i class="bi bi-clock me-1"></i><%= creditos %> horas</span>
+                    <span class="info-pill"><i class="bi bi-clock me-1"></i><%= horasAcademicas %> h. académicas / <%= horasCronologicas %> h. cronológicas</span>
                     <span class="info-pill"><i class="bi bi-people-fill me-1"></i><%= total %> inscritos</span>
                 </div>
             </div>
 
-            <div class="firma-container shadow-sm">
+            <!-- ── SELECTOR TIPO DE DOCUMENTO ── -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        <!-- Tipo de documento -->
+                        <div class="col-md-6">
+                            <h6 class="fw-bold mb-3"><i class="bi bi-file-earmark-text me-2"></i>Tipo de documento</h6>
+                            <div class="tipo-selector d-flex gap-3">
+                                <div>
+                                    <input type="radio" class="btn-check" name="tipoDoc" id="tipoCertificado" value="certificado" checked>
+                                    <label class="btn btn-outline-primary px-4" for="tipoCertificado">
+                                        <i class="bi bi-award-fill me-2"></i>Certificado
+                                    </label>
+                                </div>
+                                <div>
+                                    <input type="radio" class="btn-check" name="tipoDoc" id="tipoConstancia" value="constancia">
+                                    <label class="btn btn-outline-warning px-4" for="tipoConstancia">
+                                        <i class="bi bi-file-earmark-check-fill me-2"></i>Constancia
+                                    </label>
+                                </div>
+                            </div>
+                            <div id="notaConstancia" class="alert alert-warning mt-3 mb-0 py-2 d-none small">
+                                <i class="bi bi-info-circle me-1"></i>
+                                La <strong>Constancia</strong> usa el instructor registrado en texto (sin imagen de firma).
+                            </div>
+                        </div>
+
+                        <!-- Tipo de horas -->
+                        <div class="col-md-6">
+                            <h6 class="fw-bold mb-3"><i class="bi bi-clock-history me-2"></i>Tipo de horas a imprimir</h6>
+                            <div class="tipo-selector d-flex gap-3">
+                                <div>
+                                    <input type="radio" class="btn-check" name="tipoHoras" id="horasCronologicasRadio" value="cronologicas" checked>
+                                    <label class="btn btn-outline-secondary px-4" for="horasCronologicasRadio">
+                                        <i class="bi bi-journal-bookmark me-2"></i>Cronológicas
+                                        <span class="badge bg-secondary ms-1" id="badgeHorasCron"><%= horasCronologicas %></span>
+                                    </label>
+                                </div>
+                                <div>
+                                    <input type="radio" class="btn-check" name="tipoHoras" id="horasAcademicasRadio" value="academicas">
+                                    <label class="btn btn-outline-secondary px-4" for="horasAcademicasRadio">
+                                        <i class="bi bi-hourglass-split me-2"></i>Académicas
+                                        <span class="badge bg-secondary ms-1" id="badgeHorasAcad"><%= horasAcademicas %></span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="mt-2 text-muted small" id="notaHoras">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Se imprimirá: <strong id="textoHorasSeleccionadas"><%= horasAcademicas %> horas académicas</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── FIRMA (solo visible en modo Certificado) ── -->
+            <div class="firma-container shadow-sm" id="seccionFirma">
                 <div class="row align-items-center">
                     <div class="col-md-7">
                         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -111,10 +176,14 @@
                 </div>
             </div>
 
+            <!-- ── TABLA DE ALUMNOS ── -->
             <div class="card shadow-sm">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
                     <span class="fw-bold text-muted">LISTADO DE ALUMNOS</span>
-                    <span id="contadorSeleccionados" class="badge bg-primary rounded-pill">0 seleccionados</span>
+                    <div class="d-flex align-items-center gap-2">
+                        <span id="tipoBadge" class="badge tipo-badge-certificado rounded-pill px-3">CERTIFICADO</span>
+                        <span id="contadorSeleccionados" class="badge bg-primary rounded-pill">0 seleccionados</span>
+                    </div>
                 </div>
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-dark">
@@ -142,7 +211,7 @@
                                     <span class="badge rounded-pill badge-pendiente status-badge">Pendiente</span>
                                 </td>
                                 <td class="text-center">
-                                    <button class="btn btn-sm btn-outline-primary" title="Descargar certificado"
+                                    <button class="btn btn-sm btn-outline-primary" title="Descargar"
                                         onclick="descargarUno(this)">
                                         <i class="bi bi-download"></i>
                                     </button>
@@ -154,12 +223,13 @@
             </div>
 
             <button class="btn btn-success btn-fab" onclick="certificarSeleccionados()">
-                <i class="bi bi-file-earmark-pdf-fill me-2"></i>Certificar Seleccionados
+                <i class="bi bi-file-earmark-pdf-fill me-2"></i>Generar Seleccionados
             </button>
 
         <% } %>
     </div>
 
+    <!-- Toast -->
     <div class="position-fixed top-0 end-0 p-3" style="z-index:2000">
         <div id="toastMsg" class="toast align-items-center text-white border-0" role="alert">
             <div class="d-flex">
@@ -176,12 +246,54 @@
             docenteNombre: "<%= docenteNombre %>",
             fechaInicio: "<%= fechaInicio %>",
             fechaFin: "<%= fechaFin %>",
-            creditos: "<%= creditos %>"
+            horasAcademicas: "<%= horasAcademicas %>",
+            horasCronologicas: "<%= horasCronologicas %>"
         };
 
-        let FIRMA_BASE64 = ""; 
+        let FIRMA_BASE64 = "";
 
-        // ── Gestión de Firma e Interfaz ──────────────────────────────────
+        // ── Selector de tipo de horas ─────────────────────────────────────
+        document.querySelectorAll('input[name="tipoHoras"]').forEach(radio => {
+            radio.addEventListener('change', () => {
+                const esAcademicas = document.getElementById('horasAcademicasRadio').checked;
+                const horas = esAcademicas ? CURSO_DATA.horasAcademicas : CURSO_DATA.horasCronologicas;
+                const tipo  = esAcademicas ? 'académicas' : 'cronológicas';
+                document.getElementById('textoHorasSeleccionadas').textContent = `${horas} horas ${tipo}`;
+            });
+        });
+
+        function getCreditosSeleccionados() {
+            const esAcademicas = document.getElementById('horasAcademicasRadio').checked;
+            return esAcademicas ? CURSO_DATA.horasAcademicas : CURSO_DATA.horasCronologicas;
+        }
+
+        function getTipoHorasLabel() {
+            return document.getElementById('horasAcademicasRadio').checked ? 'académicas' : 'cronológicas';
+        }
+
+        // ── Selector de tipo de documento ────────────────────────────────
+        document.querySelectorAll('input[name="tipoDoc"]').forEach(radio => {
+            radio.addEventListener('change', () => {
+                const esCertificado = document.getElementById('tipoCertificado').checked;
+                document.getElementById('seccionFirma').style.display = esCertificado ? 'block' : 'none';
+                document.getElementById('notaConstancia').classList.toggle('d-none', esCertificado);
+
+                const badge = document.getElementById('tipoBadge');
+                if (esCertificado) {
+                    badge.textContent = 'CERTIFICADO';
+                    badge.className = 'badge tipo-badge-certificado rounded-pill px-3';
+                } else {
+                    badge.textContent = 'CONSTANCIA';
+                    badge.className = 'badge tipo-badge-constancia rounded-pill px-3';
+                }
+            });
+        });
+
+        function getTipoDocumento() {
+            return document.querySelector('input[name="tipoDoc"]:checked').value;
+        }
+
+        // ── Gestión de Firma ──────────────────────────────────────────────
         function previsualizarFirma(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
@@ -197,31 +309,33 @@
 
         function toggleFirmaVisibilidad() {
             const isChecked = document.getElementById('switchIncluirFirma').checked;
-            const previewBox = document.getElementById('previewBoxFirma');
-            previewBox.style.opacity = isChecked ? "1" : "0.3";
-            
-            if (isChecked) {
-                mostrarToast("Firma del docente habilitada", "info");
-            } else {
-                mostrarToast("Se eliminará al instructor del certificado", "warning");
-            }
+            document.getElementById('previewBoxFirma').style.opacity = isChecked ? "1" : "0.3";
+            mostrarToast(isChecked ? "Firma del docente habilitada" : "Se eliminará al instructor del certificado",
+                isChecked ? "info" : "warning");
         }
 
         // ── Descarga de PDF ──────────────────────────────────────────────
         async function descargarPDF(datos, fila) {
             setBadge(fila, 'procesando');
-            
-            // Lógica clave: Si el switch está OFF, enviamos firmaManual como VACÍO
-            const incluirFirma = document.getElementById('switchIncluirFirma').checked;
-            const firmaAEnviar = incluirFirma ? FIRMA_BASE64 : "";
 
-            const payload = { 
-                ...datos, 
-                firmaManual: firmaAEnviar 
+            const tipo = getTipoDocumento();
+            const incluirFirma = document.getElementById('switchIncluirFirma').checked;
+            const firmaAEnviar = (tipo === 'certificado' && incluirFirma) ? FIRMA_BASE64 : "";
+
+            const payload = {
+                ...datos,
+                creditos: getCreditosSeleccionados(),
+                tipoHoras: getTipoHorasLabel(),
+                firmaManual: firmaAEnviar,
+                tipo
             };
 
+            const endpoint = tipo === 'constancia'
+                ? '/api/generar-pdf-individual-constancia'
+                : '/api/generar-pdf-individual';
+
             try {
-                const res = await fetch('/api/generar-pdf-individual', {
+                const res = await fetch(endpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -233,7 +347,8 @@
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `Certificado_${datos.nombre.replace(/ /g, '_')}.pdf`;
+                const prefijo = tipo === 'constancia' ? 'Constancia' : 'Certificado';
+                a.download = `${prefijo}_${datos.nombre.replace(/ /g, '_')}.pdf`;
                 document.body.appendChild(a);
                 a.click();
                 a.remove();
@@ -246,7 +361,7 @@
             }
         }
 
-        // ── Funciones de Tabla y Edición ──────────────────────────────────
+        // ── Funciones de Tabla ────────────────────────────────────────────
         function toggleAll(src) {
             document.querySelectorAll('.alumno-check').forEach(c => {
                 c.checked = src.checked;
@@ -269,8 +384,8 @@
                 curso: CURSO_DATA.cursoNombre,
                 docente: CURSO_DATA.docenteNombre,
                 inicio: CURSO_DATA.fechaInicio,
-                fin: CURSO_DATA.fechaFin,
-                creditos: CURSO_DATA.creditos
+                fin: CURSO_DATA.fechaFin
+                // creditos se inyecta en descargarPDF dinámicamente
             };
             descargarPDF(datos, fila);
         }
@@ -281,7 +396,9 @@
                 mostrarToast('Selecciona al menos un alumno.', 'warning');
                 return;
             }
-            if (!confirm(`¿Generar ${checks.length} certificado(s)?`)) return;
+            const tipo = getTipoDocumento();
+            const label = tipo === 'constancia' ? 'constancia(s)' : 'certificado(s)';
+            if (!confirm(`¿Generar ${checks.length} ${label}?`)) return;
 
             for (const check of checks) {
                 const fila = check.closest('tr');
@@ -291,13 +408,14 @@
                     curso: CURSO_DATA.cursoNombre,
                     docente: CURSO_DATA.docenteNombre,
                     inicio: CURSO_DATA.fechaInicio,
-                    fin: CURSO_DATA.fechaFin,
-                    creditos: CURSO_DATA.creditos
+                    fin: CURSO_DATA.fechaFin
+                    // creditos se inyecta en descargarPDF dinámicamente
                 };
                 await descargarPDF(datos, fila);
             }
         }
 
+        // ── Edición de nombre del curso ───────────────────────────────────
         function habilitarEdicionCurso() {
             document.getElementById('displayCursoNombre').classList.add('d-none');
             document.getElementById('btnEditarCurso').classList.add('d-none');
@@ -320,10 +438,10 @@
         function setBadge(fila, estado) {
             const badge = fila.querySelector('.status-badge');
             const map = {
-                pendiente: ['badge-pendiente', 'Pendiente'],
-                procesando: ['badge-procesando', '⏳ Procesando...'],
-                ok: ['badge-ok', '✅ Descargado'],
-                error: ['badge-error', '❌ Error']
+                pendiente:   ['badge-pendiente', 'Pendiente'],
+                procesando:  ['badge-procesando', '⏳ Procesando...'],
+                ok:          ['badge-ok', '✅ Descargado'],
+                error:       ['badge-error', '❌ Error']
             };
             const [cls, texto] = map[estado] || map.pendiente;
             badge.className = `badge rounded-pill ${cls} status-badge`;

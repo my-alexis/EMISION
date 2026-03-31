@@ -7,48 +7,121 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
-        body { background-color: #f0f2f5; }
+        body {
+            background-color: #f0f2f5;
+        }
+
         .nh-header {
             background: linear-gradient(135deg, #1a237e 60%, #3949ab 80%, #f4511e 100%);
-            color: white; padding: 20px 30px; border-radius: 12px; margin-bottom: 24px;
+            color: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            margin-bottom: 24px;
         }
-        .nh-header h4 { margin: 0; font-weight: 700; letter-spacing: 1px; }
-        .table-selected { background-color: #e8f0fe !important; }
+
+        .nh-header h4 {
+            margin: 0;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .table-selected {
+            background-color: #e8f0fe !important;
+        }
+
         .btn-fab {
-            position: fixed; bottom: 30px; right: 30px; z-index: 1000;
-            border-radius: 50px; padding: 14px 28px;
-            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25); font-size: 15px;
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+            border-radius: 50px;
+            padding: 14px 28px;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+            font-size: 15px;
         }
-        .card { border-radius: 12px; border: none; }
-        .badge-pendiente { background-color: #e9ecef; color: #6c757d; }
-        .badge-procesando { background-color: #fff3cd; color: #856404; }
-        .badge-ok { background-color: #d1e7dd; color: #0f5132; }
-        .badge-error { background-color: #f8d7da; color: #842029; }
+
+        .card {
+            border-radius: 12px;
+            border: none;
+        }
+
+        .badge-pendiente {
+            background-color: #e9ecef;
+            color: #6c757d;
+        }
+
+        .badge-procesando {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-ok {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .badge-error {
+            background-color: #f8d7da;
+            color: #842029;
+        }
+
         .info-pill {
-            background: rgba(255, 255, 255, 0.15); border-radius: 20px;
-            padding: 4px 14px; font-size: 13px; display: inline-block; margin-right: 6px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            padding: 4px 14px;
+            font-size: 13px;
+            display: inline-block;
+            margin-right: 6px;
         }
+
         .firma-container {
-            background: #fff; border-left: 5px solid #e67e22;
-            padding: 20px; border-radius: 12px; margin-bottom: 25px;
+            background: #fff;
+            border-left: 5px solid #e67e22;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
+
         .preview-box {
-            border: 2px dashed #ccc; padding: 10px; border-radius: 8px;
-            min-height: 80px; display: flex; align-items: center;
-            justify-content: center; background: #fafafa; transition: 0.3s;
+            border: 2px dashed #ccc;
+            padding: 10px;
+            border-radius: 8px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fafafa;
+            transition: 0.3s;
         }
-        #imgPreview { max-height: 70px; display: none; }
+
+        #imgPreview {
+            max-height: 70px;
+            display: none;
+        }
 
         /* Selector de tipo de documento */
-        .tipo-selector .btn-check:checked + .btn-outline-primary {
-            background-color: #1a237e; color: white; border-color: #1a237e;
+        .tipo-selector .btn-check:checked+.btn-outline-primary {
+            background-color: #1a237e;
+            color: white;
+            border-color: #1a237e;
         }
-        .tipo-selector .btn-check:checked + .btn-outline-warning {
-            background-color: #e67e22; color: white; border-color: #e67e22;
+
+        .tipo-selector .btn-check:checked+.btn-outline-warning {
+            background-color: #e67e22;
+            color: white;
+            border-color: #e67e22;
         }
-        .tipo-badge-certificado { background: #1a237e; color: white; }
-        .tipo-badge-constancia  { background: #e67e22; color: white; }
+
+        .tipo-badge-certificado {
+            background: #1a237e;
+            color: white;
+        }
+
+        .tipo-badge-constancia {
+            background: #e67e22;
+            color: white;
+        }
     </style>
 </head>
 
@@ -72,27 +145,37 @@
             </div>
         </div>
 
-        <% if (alumnos.length > 0) { %>
+        <% if (alumnos.length> 0) { %>
 
             <div class="nh-header shadow-sm mb-4">
                 <div class="d-flex align-items-center mb-2">
                     <h4 id="displayCursoNombre" class="mb-0">
-                        <i class="bi bi-mortarboard-fill me-2"></i><%= cursoNombre %>
+                        <i class="bi bi-mortarboard-fill me-2"></i>
+                        <%= cursoNombre %>
                     </h4>
                     <input type="text" id="inputEditCurso" class="form-control form-control-sm ms-2 d-none"
                         style="max-width: 400px;" value="<%= cursoNombre %>">
                     <button id="btnEditarCurso" class="btn btn-sm text-white ms-2" onclick="habilitarEdicionCurso()">
                         <i class="bi bi-pencil-fill"></i>
                     </button>
-                    <button id="btnGuardarCurso" class="btn btn-sm btn-success ms-2 d-none" onclick="guardarEdicionCurso()">
+                    <button id="btnGuardarCurso" class="btn btn-sm btn-success ms-2 d-none"
+                        onclick="guardarEdicionCurso()">
                         <i class="bi bi-check-lg"></i>
                     </button>
                 </div>
                 <div class="mt-2">
-                    <span class="info-pill"><i class="bi bi-person-fill me-1"></i><%= docenteNombre %></span>
-                    <span class="info-pill"><i class="bi bi-calendar-range me-1"></i><%= fechaInicio %> — <%= fechaFin %></span>
-                    <span class="info-pill"><i class="bi bi-clock me-1"></i><%= horasAcademicas %> h. académicas / <%= horasCronologicas %> h. cronológicas</span>
-                    <span class="info-pill"><i class="bi bi-people-fill me-1"></i><%= total %> inscritos</span>
+                    <span class="info-pill"><i class="bi bi-person-fill me-1"></i>
+                        <%= docenteNombre %>
+                    </span>
+                    <span class="info-pill"><i class="bi bi-calendar-range me-1"></i>
+                        <%= fechaInicio %> — <%= fechaFin %>
+                    </span>
+                    <span class="info-pill"><i class="bi bi-clock me-1"></i>
+                        <%= horasAcademicas %> h. académicas / <%= horasCronologicas %> h. cronológicas
+                    </span>
+                    <span class="info-pill"><i class="bi bi-people-fill me-1"></i>
+                        <%= total %> inscritos
+                    </span>
                 </div>
             </div>
 
@@ -105,13 +188,15 @@
                             <h6 class="fw-bold mb-3"><i class="bi bi-file-earmark-text me-2"></i>Tipo de documento</h6>
                             <div class="tipo-selector d-flex gap-3">
                                 <div>
-                                    <input type="radio" class="btn-check" name="tipoDoc" id="tipoCertificado" value="certificado" checked>
+                                    <input type="radio" class="btn-check" name="tipoDoc" id="tipoCertificado"
+                                        value="certificado" checked>
                                     <label class="btn btn-outline-primary px-4" for="tipoCertificado">
                                         <i class="bi bi-award-fill me-2"></i>Certificado
                                     </label>
                                 </div>
                                 <div>
-                                    <input type="radio" class="btn-check" name="tipoDoc" id="tipoConstancia" value="constancia">
+                                    <input type="radio" class="btn-check" name="tipoDoc" id="tipoConstancia"
+                                        value="constancia">
                                     <label class="btn btn-outline-warning px-4" for="tipoConstancia">
                                         <i class="bi bi-file-earmark-check-fill me-2"></i>Constancia
                                     </label>
@@ -119,32 +204,56 @@
                             </div>
                             <div id="notaConstancia" class="alert alert-warning mt-3 mb-0 py-2 d-none small">
                                 <i class="bi bi-info-circle me-1"></i>
-                                La <strong>Constancia</strong> usa el instructor registrado en texto (sin imagen de firma).
+                                La <strong>Constancia</strong> usa el instructor registrado en texto (sin imagen de
+                                firma).
                             </div>
                         </div>
 
                         <!-- Tipo de horas -->
                         <div class="col-md-6">
-                            <h6 class="fw-bold mb-3"><i class="bi bi-clock-history me-2"></i>Tipo de horas a imprimir</h6>
+                            <h6 class="fw-bold mb-3"><i class="bi bi-clock-history me-2"></i>Tipo de horas a imprimir
+                            </h6>
                             <div class="tipo-selector d-flex gap-3">
                                 <div>
-                                    <input type="radio" class="btn-check" name="tipoHoras" id="horasCronologicasRadio" value="cronologicas" checked>
+                                    <input type="radio" class="btn-check" name="tipoHoras" id="horasCronologicasRadio"
+                                        value="cronologicas" checked>
                                     <label class="btn btn-outline-secondary px-4" for="horasCronologicasRadio">
                                         <i class="bi bi-journal-bookmark me-2"></i>Cronológicas
-                                        <span class="badge bg-secondary ms-1" id="badgeHorasCron"><%= horasCronologicas %></span>
+                                        <span class="badge bg-secondary ms-1" id="badgeHorasCron">
+                                            <%= horasCronologicas %>
+                                        </span>
                                     </label>
                                 </div>
                                 <div>
-                                    <input type="radio" class="btn-check" name="tipoHoras" id="horasAcademicasRadio" value="academicas">
+                                    <input type="radio" class="btn-check" name="tipoHoras" id="horasAcademicasRadio"
+                                        value="academicas">
                                     <label class="btn btn-outline-secondary px-4" for="horasAcademicasRadio">
                                         <i class="bi bi-hourglass-split me-2"></i>Académicas
-                                        <span class="badge bg-secondary ms-1" id="badgeHorasAcad"><%= horasAcademicas %></span>
+                                        <span class="badge bg-secondary ms-1" id="badgeHorasAcad">
+                                            <%= horasAcademicas %>
+                                        </span>
                                     </label>
                                 </div>
                             </div>
                             <div class="mt-2 text-muted small" id="notaHoras">
                                 <i class="bi bi-info-circle me-1"></i>
-                                Se imprimirá: <strong id="textoHorasSeleccionadas"><%= horasAcademicas %> horas académicas</strong>
+                                Se imprimirá: <strong id="textoHorasSeleccionadas">
+                                    <%= horasAcademicas %> horas académicas
+                                </strong>
+                            </div>
+                        </div>
+
+                        <!-- ── FECHA DE EMISIÓN ── -->
+                        <div class="col-12 mt-3">
+                            <h6 class="fw-bold mb-2"><i class="bi bi-calendar-event me-2"></i>Fecha de emisión del
+                                certificado</h6>
+                            <div class="input-group" style="max-width: 320px;">
+                                <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
+                                <input type="date" id="inputFechaEmision" class="form-control"
+                                    value="<%= new Date().toISOString().split('T')[0] %>">
+                            </div>
+                            <div class="text-muted small mt-1">
+                                Se imprimirá: <strong id="textoFechaEmision"></strong>
                             </div>
                         </div>
                     </div>
@@ -160,10 +269,12 @@
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" id="switchIncluirFirma" checked
                                     onchange="toggleFirmaVisibilidad()">
-                                <label class="form-check-label small fw-bold" for="switchIncluirFirma">Incluir en certificado</label>
+                                <label class="form-check-label small fw-bold" for="switchIncluirFirma">Incluir en
+                                    certificado</label>
                             </div>
                         </div>
-                        <p class="text-muted small">Sube el PNG de la firma. Si desactivas el switch, <b>desaparecerá todo el bloque del instructor</b> (línea y nombre) en el PDF.</p>
+                        <p class="text-muted small">Sube el PNG de la firma. Si desactivas el switch, <b>desaparecerá
+                                todo el bloque del instructor</b> (línea y nombre) en el PDF.</p>
                         <input type="file" id="inputFirma" class="form-control" accept="image/png"
                             onchange="previsualizarFirma(this)">
                     </div>
@@ -189,7 +300,8 @@
                     <thead class="table-dark">
                         <tr>
                             <th width="50" class="text-center">
-                                <input type="checkbox" id="selectAll" class="form-check-input" onclick="toggleAll(this)">
+                                <input type="checkbox" id="selectAll" class="form-check-input"
+                                    onclick="toggleAll(this)">
                             </th>
                             <th>CÓDIGO NH</th>
                             <th>APELLIDOS Y NOMBRES</th>
@@ -206,7 +318,9 @@
                                         onchange="actualizarContador()">
                                 </td>
                                 <td><code class="fw-bold text-primary"><%= alu.codigo %></code></td>
-                                <td class="fw-semibold"><%= alu.nombre %></td>
+                                <td class="fw-semibold">
+                                    <%= alu.nombre %>
+                                </td>
                                 <td class="text-center">
                                     <span class="badge rounded-pill badge-pendiente status-badge">Pendiente</span>
                                 </td>
@@ -217,7 +331,7 @@
                                     </button>
                                 </td>
                             </tr>
-                        <% }) %>
+                            <% }) %>
                     </tbody>
                 </table>
             </div>
@@ -226,7 +340,7 @@
                 <i class="bi bi-file-earmark-pdf-fill me-2"></i>Generar Seleccionados
             </button>
 
-        <% } %>
+            <% } %>
     </div>
 
     <!-- Toast -->
@@ -257,7 +371,7 @@
             radio.addEventListener('change', () => {
                 const esAcademicas = document.getElementById('horasAcademicasRadio').checked;
                 const horas = esAcademicas ? CURSO_DATA.horasAcademicas : CURSO_DATA.horasCronologicas;
-                const tipo  = esAcademicas ? 'académicas' : 'cronológicas';
+                const tipo = esAcademicas ? 'académicas' : 'cronológicas';
                 document.getElementById('textoHorasSeleccionadas').textContent = `${horas} horas ${tipo}`;
             });
         });
@@ -327,7 +441,8 @@
                 creditos: getCreditosSeleccionados(),
                 tipoHoras: getTipoHorasLabel(),
                 firmaManual: firmaAEnviar,
-                tipo
+                tipo,
+                fechaEmision: getFechaEmision()   
             };
 
             const endpoint = tipo === 'constancia'
@@ -438,10 +553,10 @@
         function setBadge(fila, estado) {
             const badge = fila.querySelector('.status-badge');
             const map = {
-                pendiente:   ['badge-pendiente', 'Pendiente'],
-                procesando:  ['badge-procesando', '⏳ Procesando...'],
-                ok:          ['badge-ok', '✅ Descargado'],
-                error:       ['badge-error', '❌ Error']
+                pendiente: ['badge-pendiente', 'Pendiente'],
+                procesando: ['badge-procesando', '⏳ Procesando...'],
+                ok: ['badge-ok', '✅ Descargado'],
+                error: ['badge-error', '❌ Error']
             };
             const [cls, texto] = map[estado] || map.pendiente;
             badge.className = `badge rounded-pill ${cls} status-badge`;
@@ -454,6 +569,28 @@
             document.getElementById('toastBody').textContent = msg;
             bootstrap.Toast.getOrCreateInstance(el, { delay: 4000 }).show();
         }
+
+        // Inicializar texto de fecha
+        function actualizarTextoFecha() {
+            const val = document.getElementById('inputFechaEmision').value;
+            if (!val) return;
+            const [y, m, d] = val.split('-');
+            const fecha = new Date(y, m - 1, d); // evita problemas de timezone
+            document.getElementById('textoFechaEmision').textContent =
+                fecha.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+        }
+
+        document.getElementById('inputFechaEmision').addEventListener('change', actualizarTextoFecha);
+        actualizarTextoFecha(); // ejecutar al cargar
+
+        function getFechaEmision() {
+            const val = document.getElementById('inputFechaEmision').value;
+            if (!val) return new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+            const [y, m, d] = val.split('-');
+            const fecha = new Date(y, m - 1, d);
+            return fecha.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+        }
     </script>
 </body>
+
 </html>

@@ -61,8 +61,7 @@ const getFechaHoy = () => {
     }).format(new Date());
 };
 
-// --- RENDERIZADO DE CERTIFICADO ---
-function renderizarCertificado(app, datos) {
+function renderizarCertificado(app, datos) {   // ← quita el parámetro req
     const logoSrc = getImagenBase64('logoNH.png');
     const firmaFijaSrc = getImagenBase64('firma_juan.png');
     const fondoPath = path.join(__dirname, 'public', 'images', 'fondo_certificado.png');
@@ -82,7 +81,8 @@ function renderizarCertificado(app, datos) {
             logoSrc,
             firmaFijaSrc,
             fondoSrc,
-            firmaDocenteSrc: datos.firmaManual || ""
+            firmaDocenteSrc: datos.firmaManual || "",
+            fechaEmision: datos.fechaEmision || getFechaHoy()  // ← lee de datos, no de req
         }, (err, html) => {
             if (err) return reject(err);
             resolve(html);
@@ -217,11 +217,10 @@ app.post('/buscar', async (req, res) => {
     }
 });
 
-// --- GENERAR CERTIFICADO INDIVIDUAL ---
 app.post('/api/generar-pdf-individual', async (req, res) => {
     try {
-        const datos = req.body;
-        const html = await renderizarCertificado(app, datos);
+        const datos = req.body;  // fechaEmision ya viene aquí desde el frontend
+        const html = await renderizarCertificado(app, datos);  // sin req
         const pdf = await generarPDF(html, 'landscape');
         const archivo = nombreArchivoSeguro(datos.nombre, datos.codigo, 'Certificado');
         await fs.writeFile(path.join(CARPETA_CERTIFICADOS, archivo), pdf);

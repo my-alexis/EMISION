@@ -61,7 +61,7 @@
         .text-info {
             font-size: 16px;
             margin: 2px 0 0 0;
-            color: #444;
+            color: #0d47a1;
         }
 
         .student-name {
@@ -104,6 +104,7 @@
         }
 
         .duration-info {
+            color: #0d47a1;
             font-size: 17px;
             margin-top: 1px;
             line-height: 1.3;
@@ -161,6 +162,7 @@
 
         .cert-code {
             text-align: right;
+            
         }
 
         .code-label {
@@ -177,7 +179,7 @@
         .location-date {
             margin-top: 15px;
             font-size: 13px;
-            color: #666;
+            color: #0d47a1;
         }
     </style>
 </head>
@@ -194,7 +196,7 @@
             <br><br><br><br>
             <h1 class="main-title">CERTIFICADO</h1>
             <br>
-            <div class="text-info">Otorgado a:</div>
+            <!-- <div class="text-info">Otorgado a:</div> -->
             <br>
             <div class="student-name">
                 <%= nombreAlumno %>
@@ -236,8 +238,8 @@
                             <% if (firmaFijaSrc) { %>
                                 <img src="<%= firmaFijaSrc %>" class="signature-img">
                                 <% } %>
-                                    <div class="sig-label">Coordinador de Operaciones</div>
-                                    <div class="sig-name">JUAN ORTIZ</div>
+                                    <div class="sig-label">Jefa de Operaciones</div>
+                                    <div class="sig-name">LILA FERNANDEZ LOZANO</div>
                         </div>
 
                         <div class="cert-code">

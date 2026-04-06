@@ -103,7 +103,7 @@
 
         .firma-manuscrita {
             /* Fuente que más se parece a la imagen */
-            font-family: 'Brush Script MT', 'Segoe Script', 'Dancing Script', cursive;
+            font-family: 'Brush Script MT', cursive;
             font-size: 26px;
             /* Aumentado para que destaque como en la imagen */
             color: #1a1a1a;
@@ -112,7 +112,6 @@
             margin-bottom: 5px;
             line-height: 1;
             display: block;
-            font-style: italic;
         }
 
         .firma-img {
@@ -170,11 +169,14 @@
 <body>
     <div class="page">
         <div class="main-content">
-            <br><br>
-            <div class="titulo">CONSTANCIA DE PARTICIPACIÓN</div>
+            <br><br><br><br>
+            <div class="titulo">CONSTANCIA DE ESTUDIOS</div>
             <br>
+
             <div class="cuerpo">
-                Otorgado a:
+                A través de la presente, New Horizons Perú S.A, domiciliada en Av. Santa Cruz 870,
+                Miraflores, con RUC N° 20306532201, en su calidad de Centro de Capacitación acredita que el
+                participante:
             </div>
 
             <span class="nombre-alumno">
@@ -182,38 +184,45 @@
             </span>
             <br>
             <div class="cuerpo">
-                Por su participación en el Bootcamp Online “RRHH Digital & Automatización”, espacio de actualización dirigido a líderes y  profesionales de Recursos Humanos, enfocado en las tendencias de automatización, digitalización y transformación de la gestión del talento.
-                Desarrollado el 25 de febrero de 2026, con una duración de 2 horas, en modalidad online
+                Ha completado el curso <strong>"<%= nombreCurso %>"</strong> llevado a cabo desde el
+                    <strong>
+                        <%= inicio %>
+                    </strong> al <strong>
+                        <%= fin %>
+                    </strong>,
+                    con una duración de
+                    <strong>
+                        <%= creditos %>
+                    </strong> horas <%= tipoHoras %>
             </div>
             <br>
-            <div class="fecha-emision">
-                Lima, <%= fechaEmision %>.
+            <div class="location-date">
+                Lima, <%= fechaEmision %>
             </div>
 
         </div>
 
         <!-- FIRMAS -->
         <div class="firmas-section">
-
             <!-- Firma Instructor -->
-
-            <!-- Firma Gerente -->
             <div class="firma-bloque">
-                <% if (firmaFijaSrc) { %>
-                    <img src="<%= firmaFijaSrc %>" class="firma-img">
-                <% } else { %>
-                    <span class="firma-manuscrita">Juan Ortiz</span>
-                <% } %>
-                <div class="firma-linea"></div>
-                <div class="firma-nombre">JUAN ORTIZ LINARES</div>
-                <div class="firma-cargo">Coordinador Académico</div>
-                <div class="firma-cargo">New Horizons Perú</div>
+                <% if (firmaDocenteSrc && firmaDocenteSrc !=="" ) { %>
+                    <img src="<%= firmaDocenteSrc %>" class="firma-img">
+                    <% } else { %>
+                        <span class="firma-manuscrita">
+                            <%= nombreDocente.split(' ').slice(0, 2).join(' ') %>
+                        </span>
+                    <% } %>
+                    <div class="firma-linea"></div>
+                    <div class="firma-nombre"><%= nombreDocente %></div>
+                    <div class="firma-cargo">Instructor</div>
+                </div>
             </div>
 
-        </div>
-
         <!-- CÓDIGO NH -->
-        <div class="codigo-nh"><%= codigoNH %></div>
+        <div class="codigo-nh">
+            <%= codigoNH %>
+        </div>
 
     </div>
 </body>

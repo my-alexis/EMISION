@@ -7,6 +7,7 @@ const path = require('path');
 const puppeteer = require('puppeteer');
 const fs = require('fs').promises;
 const fsSync = require('fs');
+const { PDFDocument } = require('pdf-lib');
 
 const app = express();
 app.use(express.static('public'));
@@ -92,10 +93,19 @@ function renderizarCertificado(app, datos) {   // ← quita el parámetro req
 
 // --- RENDERIZADO DE CONSTANCIA ---
 function renderizarConstancia(app, datos) {
-    const firmaFijaSrc = getImagenBase64('firma_jose.png'); // Firma del gerente
+
+    function toTitleCase(str) {
+        if (!str) return '';
+        return str.toLowerCase().replace(/\b\w/g, (letra) => letra.toUpperCase());
+    }
+
+    const firmaFijaSrc = getImagenBase64('firma_juan.png'); // Firma del gerente
     const fondoPath = path.join(__dirname, 'public', 'images', 'fondo_constancia.png');
     const fondoBase64 = fsSync.readFileSync(fondoPath, { encoding: 'base64' });
     const fondoSrc = `data:image/png;base64,${fondoBase64}`;
+
+     // 👇 Agrega este console.log para verificar qué trae datos
+    console.log('Datos recibidos:', datos);
 
     return new Promise((resolve, reject) => {
         app.render('constancia', {
@@ -105,17 +115,45 @@ function renderizarConstancia(app, datos) {
             tipoHoras: datos.tipoHoras || 'académicas',
             inicio: datos.inicio,
             fin: datos.fin,
-            nombreDocente: datos.docente,
+            nombreDocente: toTitleCase(datos.docente),
             codigoNH: datos.codigo,
             firmaFijaSrc,
             fondoSrc,
             firmaDocenteSrc: datos.firmaManual || "",
-            fechaEmision: getFechaHoy()
+            fechaEmision: datos.fechaEmision || getFechaHoy()
         }, (err, html) => {
             if (err) return reject(err);
             resolve(html);
         });
     });
+}
+
+// --- UNIR DOS PDFS ---
+async function unirConTemario(pdfCertificado) {
+    const temarioPath = path.join(__dirname, 'CERTIFICADO-TEMARIO.pdf');
+    
+    // Si no existe el temario, retorna solo el certificado
+    if (!fsSync.existsSync(temarioPath)) {
+        console.warn('⚠️ CERTIFICADO-TEMARIO.pdf no encontrado, se omite la fusión.');
+        return pdfCertificado;
+    }
+
+    const temarioBytes = fsSync.readFileSync(temarioPath);
+
+    const docFinal = await PDFDocument.create();
+    const docCert = await PDFDocument.load(pdfCertificado);
+    const docTemario = await PDFDocument.load(temarioBytes);
+
+    // Copiar páginas del certificado
+    const pagesCert = await docFinal.copyPages(docCert, docCert.getPageIndices());
+    pagesCert.forEach(p => docFinal.addPage(p));
+
+    // Copiar páginas del temario
+    const pagesTemario = await docFinal.copyPages(docTemario, docTemario.getPageIndices());
+    pagesTemario.forEach(p => docFinal.addPage(p));
+
+    const pdfFinalBytes = await docFinal.save();
+    return Buffer.from(pdfFinalBytes);
 }
 
 // --- GENERACIÓN DE PDF CON PUPPETEER ---
@@ -219,9 +257,10 @@ app.post('/buscar', async (req, res) => {
 
 app.post('/api/generar-pdf-individual', async (req, res) => {
     try {
-        const datos = req.body;  // fechaEmision ya viene aquí desde el frontend
-        const html = await renderizarCertificado(app, datos);  // sin req
-        const pdf = await generarPDF(html, 'landscape');
+        const datos = req.body;
+        const html = await renderizarCertificado(app, datos);
+        let pdf = await generarPDF(html, 'landscape');
+        pdf = await unirConTemario(pdf); // ← fusiona con el temario
         const archivo = nombreArchivoSeguro(datos.nombre, datos.codigo, 'Certificado');
         await fs.writeFile(path.join(CARPETA_CERTIFICADOS, archivo), pdf);
         res.setHeader('Content-Type', 'application/pdf');

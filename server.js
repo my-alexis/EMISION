@@ -96,16 +96,18 @@ function renderizarConstancia(app, datos) {
 
     function toTitleCase(str) {
         if (!str) return '';
-        return str.toLowerCase().replace(/\b\w/g, (letra) => letra.toUpperCase());
+        return str.toLowerCase().replace(/(?:^|\s)\S/g, (letra) => letra.toUpperCase());
     }
 
-    const firmaFijaSrc = getImagenBase64('firma_juan.png'); // Firma del gerente
+    const firmaFijaSrc = getImagenBase64('firma_juan.png');
     const fondoPath = path.join(__dirname, 'public', 'images', 'fondo_constancia.png');
     const fondoBase64 = fsSync.readFileSync(fondoPath, { encoding: 'base64' });
     const fondoSrc = `data:image/png;base64,${fondoBase64}`;
 
-     // 👇 Agrega este console.log para verificar qué trae datos
-    console.log('Datos recibidos:', datos);
+    // ← Fuente embebida en base64 para Puppeteer
+    const fontPath = path.join(__dirname, 'public', 'fonts', 'DancingScript[wght].ttf');
+    const fontBase64 = fsSync.readFileSync(fontPath, { encoding: 'base64' });
+    const fontSrc = `data:font/truetype;base64,${fontBase64}`;
 
     return new Promise((resolve, reject) => {
         app.render('constancia', {
@@ -119,6 +121,7 @@ function renderizarConstancia(app, datos) {
             codigoNH: datos.codigo,
             firmaFijaSrc,
             fondoSrc,
+            fontSrc, // ← agrega esto
             firmaDocenteSrc: datos.firmaManual || "",
             fechaEmision: datos.fechaEmision || getFechaHoy()
         }, (err, html) => {

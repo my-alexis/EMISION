@@ -15,6 +15,12 @@
             padding: 0;
         }
 
+        @font-face {
+            font-family: 'Dancing Script';
+            src: url('<%= fontSrc %>') format('truetype');
+            font-weight: 500;
+        }
+
         body {
             margin: 0;
             padding: 0;
@@ -103,7 +109,7 @@
 
         .firma-manuscrita {
             /* Fuente que más se parece a la imagen */
-            font-family: 'Brush Script MT', cursive;
+            font-family: 'Dancing Script', cursive;
             font-size: 26px;
             /* Aumentado para que destaque como en la imagen */
             color: #1a1a1a;
@@ -185,15 +191,15 @@
             <br>
             <div class="cuerpo">
                 Ha completado el curso <strong>"<%= nombreCurso %>"</strong> llevado a cabo desde el
-                    <strong>
-                        <%= inicio %>
-                    </strong> al <strong>
-                        <%= fin %>
-                    </strong>,
-                    con una duración de
-                    <strong>
-                        <%= creditos %>
-                    </strong> horas <%= tipoHoras %>
+                <strong>
+                    <%= inicio %>
+                </strong> al <strong>
+                    <%= fin %>
+                </strong>,
+                con una duración de
+                <strong>
+                    <%= creditos %>
+                </strong> horas <%= tipoHoras %>
             </div>
             <br>
             <div class="location-date">

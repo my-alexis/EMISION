@@ -17,7 +17,7 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 // --- CONFIGURACIÓN ---
-const API_KEY = 'c602f00b4dafe00e89fabb34a53862d49d4ae0947fe8323b96c7';
+const API_KEY = '4ea187998ed58eb48fae278a457fc57f023eb5277de7139943b6';
 const DOMINIO = 'https://newhorizonsperu.matrixlms.com';
 const CARPETA_CERTIFICADOS = path.join(__dirname, 'certificados_generados');
 
@@ -314,6 +314,54 @@ app.post('/api/subir-firma', upload.single('archivoFirma'), (req, res) => {
     res.send(`<script>alert("Firma guardada en servidor"); window.location.href="/";</script>`);
 });
 
+// --- RUTA CORREGIDA PARA CARGAR DATOS DEL CURSO ---
+app.get('/api/clase/:id', async (req, res) => {
+    const cursoId = req.params.id;
+    try {
+        // Cambiado de /classes/ a /courses/ según tu prueba exitosa en Postman
+        const url = `${DOMINIO}/api/v3/courses/${cursoId}?api_key=${API_KEY}`;
+        console.log("Consultando a:", url); // Esto te servirá para ver la URL en la terminal
+
+        const respuesta = await axios.get(url);
+        
+        if (respuesta.data) {
+            // Enviamos los datos al frontend (index.ejs)
+            res.json(respuesta.data);
+        } else {
+            res.status(404).json({ error: "No se encontró el curso" });
+        }
+    } catch (e) {
+        // Imprime el error real en la terminal de VS Code para debuguear
+        console.error("Error al obtener curso:", e.response ? e.response.data : e.message);
+        res.status(500).json({ error: "Error al conectar con la API de Matrix" });
+    }
+});
+
+// --- ALTERNATIVA: USANDO POST COMO TÚNEL PARA PUT ---
+app.patch('/api/clase/:id/short-description', async (req, res) => {
+    const cursoId = req.params.id;
+    const { short_description } = req.body;
+
+    try {
+        const url = `${DOMINIO}/api/v3/courses/${cursoId}?api_key=${API_KEY}`;
+        
+        const respuesta = await axios.patch(url, {
+                short_description: short_description
+        }, {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        res.json({ mensaje: "Actualizado con éxito mediante túnel" });
+    } catch (e) {
+        console.error("Error con alternativa POST:", e.response ? e.response.data : e.message);
+        res.status(500).json({ 
+            error: "La API sigue rechazando la actualización",
+            detalles: e.response ? e.response.data : e.message 
+        });
+    }
+});
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Servidor Shukita v2 disponible en puerto ${PORT}`);
 });

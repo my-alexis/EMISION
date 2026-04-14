@@ -11,6 +11,49 @@
             background-color: #f0f2f5;
         }
 
+        /* ── NAVBAR ── */
+        .nh-navbar {
+            background: linear-gradient(135deg, #1a237e 60%, #3949ab 80%, #f4511e 100%);
+            padding: 0;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+        }
+
+        .nh-navbar .navbar-brand {
+            color: white !important;
+            font-weight: 800;
+            font-size: 1.15rem;
+            letter-spacing: 1px;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nh-navbar .nav-link {
+            color: rgba(255,255,255,0.80) !important;
+            font-weight: 600;
+            font-size: 0.92rem;
+            padding: 18px 20px !important;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .nh-navbar .nav-link:hover,
+        .nh-navbar .nav-link.active {
+            color: white !important;
+            border-bottom: 3px solid #f4511e;
+            background: rgba(255,255,255,0.08);
+        }
+
+        .nh-navbar .nav-link i {
+            margin-right: 6px;
+        }
+
+        /* ── PÁGINAS ── */
+        .page-section { display: none; }
+        .page-section.active { display: block; }
+
+        /* ── HEADER DEL CURSO ── */
         .nh-header {
             background: linear-gradient(135deg, #1a237e 60%, #3949ab 80%, #f4511e 100%);
             color: white;
@@ -25,9 +68,7 @@
             letter-spacing: 1px;
         }
 
-        .table-selected {
-            background-color: #e8f0fe !important;
-        }
+        .table-selected { background-color: #e8f0fe !important; }
 
         .btn-fab {
             position: fixed;
@@ -36,37 +77,19 @@
             z-index: 1000;
             border-radius: 50px;
             padding: 14px 28px;
-            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+            box-shadow: 0 4px 18px rgba(0,0,0,0.25);
             font-size: 15px;
         }
 
-        .card {
-            border-radius: 12px;
-            border: none;
-        }
+        .card { border-radius: 12px; border: none; }
 
-        .badge-pendiente {
-            background-color: #e9ecef;
-            color: #6c757d;
-        }
-
-        .badge-procesando {
-            background-color: #fff3cd;
-            color: #856404;
-        }
-
-        .badge-ok {
-            background-color: #d1e7dd;
-            color: #0f5132;
-        }
-
-        .badge-error {
-            background-color: #f8d7da;
-            color: #842029;
-        }
+        .badge-pendiente { background-color: #e9ecef; color: #6c757d; }
+        .badge-procesando { background-color: #fff3cd; color: #856404; }
+        .badge-ok { background-color: #d1e7dd; color: #0f5132; }
+        .badge-error { background-color: #f8d7da; color: #842029; }
 
         .info-pill {
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(255,255,255,0.15);
             border-radius: 20px;
             padding: 4px 14px;
             font-size: 13px;
@@ -80,7 +103,7 @@
             padding: 20px;
             border-radius: 12px;
             margin-bottom: 25px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
 
         .preview-box {
@@ -95,108 +118,177 @@
             transition: 0.3s;
         }
 
-        #imgPreview {
-            max-height: 70px;
-            display: none;
+        #imgPreview { max-height: 70px; display: none; }
+
+        .tipo-selector .btn-check:checked+.btn-outline-primary {
+            background-color: #1a237e; color: white; border-color: #1a237e;
+        }
+        .tipo-selector .btn-check:checked+.btn-outline-warning {
+            background-color: #e67e22; color: white; border-color: #e67e22;
         }
 
-        /* Selector de tipo de documento */
-        .tipo-selector .btn-check:checked+.btn-outline-primary {
+        .tipo-badge-certificado { background: #1a237e; color: white; }
+        .tipo-badge-constancia { background: #e67e22; color: white; }
+
+        /* ── CONFIG CLASE ── */
+        .config-header {
+            background: linear-gradient(135deg, #0d47a1, #1565c0);
+            color: white;
+            padding: 22px 28px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+        }
+
+        .config-header h4 { margin: 0; font-weight: 700; }
+
+        .field-card {
+            background: #fff;
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        }
+
+        .field-card .card-header {
+            background: #f8f9fa;
+            border-radius: 12px 12px 0 0 !important;
+            border-bottom: 2px solid #e9ecef;
+            font-weight: 700;
+            color: #1a237e;
+        }
+
+        .sesion-preview-item {
+            font-size: 0.85rem;
+            color: #495057;
+            padding: 3px 0;
+        }
+
+        .sesion-preview-box {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 14px;
+            max-height: 280px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.82rem;
+            line-height: 1.6;
+        }
+
+        .day-btn-group .btn-check:checked + .btn {
             background-color: #1a237e;
             color: white;
             border-color: #1a237e;
         }
 
-        .tipo-selector .btn-check:checked+.btn-outline-warning {
-            background-color: #e67e22;
-            color: white;
-            border-color: #e67e22;
+        .day-btn-group .btn {
+            font-size: 0.78rem;
+            padding: 5px 10px;
         }
 
-        .tipo-badge-certificado {
-            background: #1a237e;
-            color: white;
+        .loading-overlay {
+            display: none;
+            position: absolute;
+            inset: 0;
+            background: rgba(255,255,255,0.75);
+            border-radius: 12px;
+            z-index: 10;
+            align-items: center;
+            justify-content: center;
         }
 
-        .tipo-badge-constancia {
-            background: #e67e22;
-            color: white;
+        .loading-overlay.show { display: flex; }
+
+        .api-status-badge {
+            font-size: 0.78rem;
+            padding: 4px 10px;
         }
     </style>
 </head>
 
 <body>
-    <div class="container py-4" style="max-width:960px">
 
-        <div class="card shadow-sm mb-4">
-            <div class="card-body p-4">
-                <form action="/buscar" method="POST" class="row g-3 align-items-end">
-                    <div class="col-md-8">
-                        <label class="form-label fw-bold">ID de Clase — MatrixLMS</label>
-                        <input type="text" name="cursoId" class="form-control form-control-lg" placeholder="Ej: 2172594"
-                            value="<%= cursoId %>" required>
-                    </div>
-                    <div class="col-md-4">
-                        <button type="submit" class="btn btn-primary btn-lg w-100">
-                            <i class="bi bi-search"></i> Cargar Alumnos
-                        </button>
-                    </div>
-                </form>
-            </div>
+    <!-- ═══════════════ NAVBAR ═══════════════ -->
+    <nav class="navbar nh-navbar mb-4">
+        <div class="container-fluid" style="max-width:960px; margin:auto;">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-mortarboard-fill" style="font-size:1.4rem;"></i>
+                New Horizons
+            </a>
+            <ul class="navbar-nav flex-row ms-3">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#" onclick="showPage('certificaciones', this)">
+                        <i class="bi bi-award-fill"></i>Certificaciones
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="showPage('config-clase', this)">
+                        <i class="bi bi-gear-fill"></i>Configuración Clase
+                    </a>
+                </li>
+            </ul>
         </div>
+    </nav>
 
-        <% if (alumnos.length> 0) { %>
+    <!-- ═══════════════ PÁGINA: CERTIFICACIONES ═══════════════ -->
+    <div id="page-certificaciones" class="page-section active">
+        <div class="container py-2" style="max-width:960px">
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <form action="/buscar" method="POST" class="row g-3 align-items-end">
+                        <div class="col-md-8">
+                            <label class="form-label fw-bold">ID de Clase — MatrixLMS</label>
+                            <input type="text" name="cursoId" class="form-control form-control-lg"
+                                placeholder="Ej: 2172594" value="<%= cursoId %>" required>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-primary btn-lg w-100">
+                                <i class="bi bi-search"></i> Cargar Alumnos
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <% if (alumnos.length > 0) { %>
 
             <div class="nh-header shadow-sm mb-4">
                 <div class="d-flex align-items-center mb-2">
                     <h4 id="displayCursoNombre" class="mb-0">
-                        <i class="bi bi-mortarboard-fill me-2"></i>
-                        <%= cursoNombre %>
+                        <i class="bi bi-mortarboard-fill me-2"></i><%= cursoNombre %>
                     </h4>
                     <input type="text" id="inputEditCurso" class="form-control form-control-sm ms-2 d-none"
-                        style="max-width: 400px;" value="<%= cursoNombre %>">
+                        style="max-width:400px;" value="<%= cursoNombre %>">
                     <button id="btnEditarCurso" class="btn btn-sm text-white ms-2" onclick="habilitarEdicionCurso()">
                         <i class="bi bi-pencil-fill"></i>
                     </button>
-                    <button id="btnGuardarCurso" class="btn btn-sm btn-success ms-2 d-none"
-                        onclick="guardarEdicionCurso()">
+                    <button id="btnGuardarCurso" class="btn btn-sm btn-success ms-2 d-none" onclick="guardarEdicionCurso()">
                         <i class="bi bi-check-lg"></i>
                     </button>
                 </div>
                 <div class="mt-2">
-                    <span class="info-pill"><i class="bi bi-person-fill me-1"></i>
-                        <%= docenteNombre %>
-                    </span>
-                    <span class="info-pill"><i class="bi bi-calendar-range me-1"></i>
-                        <%= fechaInicio %> — <%= fechaFin %>
-                    </span>
-                    <span class="info-pill"><i class="bi bi-clock me-1"></i>
-                        <%= horasAcademicas %> h. académicas / <%= horasCronologicas %> h. cronológicas
-                    </span>
-                    <span class="info-pill"><i class="bi bi-people-fill me-1"></i>
-                        <%= total %> inscritos
-                    </span>
+                    <span class="info-pill"><i class="bi bi-person-fill me-1"></i><%= docenteNombre %></span>
+                    <span class="info-pill"><i class="bi bi-calendar-range me-1"></i><%= fechaInicio %> — <%= fechaFin %></span>
+                    <span class="info-pill"><i class="bi bi-clock me-1"></i><%= horasAcademicas %> h. académicas / <%= horasCronologicas %> h. cronológicas</span>
+                    <span class="info-pill"><i class="bi bi-people-fill me-1"></i><%= total %> inscritos</span>
                 </div>
             </div>
 
-            <!-- ── SELECTOR TIPO DE DOCUMENTO ── -->
+            <!-- SELECTOR TIPO -->
             <div class="card shadow-sm mb-4">
                 <div class="card-body p-4">
                     <div class="row g-4">
-                        <!-- Tipo de documento -->
                         <div class="col-md-6">
                             <h6 class="fw-bold mb-3"><i class="bi bi-file-earmark-text me-2"></i>Tipo de documento</h6>
                             <div class="tipo-selector d-flex gap-3">
                                 <div>
-                                    <input type="radio" class="btn-check" name="tipoDoc" id="tipoCertificado"
-                                        value="certificado" checked>
+                                    <input type="radio" class="btn-check" name="tipoDoc" id="tipoCertificado" value="certificado" checked>
                                     <label class="btn btn-outline-primary px-4" for="tipoCertificado">
                                         <i class="bi bi-award-fill me-2"></i>Certificado
                                     </label>
                                 </div>
                                 <div>
-                                    <input type="radio" class="btn-check" name="tipoDoc" id="tipoConstancia"
-                                        value="constancia">
+                                    <input type="radio" class="btn-check" name="tipoDoc" id="tipoConstancia" value="constancia">
                                     <label class="btn btn-outline-warning px-4" for="tipoConstancia">
                                         <i class="bi bi-file-earmark-check-fill me-2"></i>Constancia
                                     </label>
@@ -204,79 +296,58 @@
                             </div>
                             <div id="notaConstancia" class="alert alert-warning mt-3 mb-0 py-2 d-none small">
                                 <i class="bi bi-info-circle me-1"></i>
-                                La <strong>Constancia</strong> usa el instructor registrado en texto (sin imagen de
-                                firma).
+                                La <strong>Constancia</strong> usa el instructor registrado en texto (sin imagen de firma).
                             </div>
                         </div>
-
-                        <!-- Tipo de horas -->
                         <div class="col-md-6">
-                            <h6 class="fw-bold mb-3"><i class="bi bi-clock-history me-2"></i>Tipo de horas a imprimir
-                            </h6>
+                            <h6 class="fw-bold mb-3"><i class="bi bi-clock-history me-2"></i>Tipo de horas a imprimir</h6>
                             <div class="tipo-selector d-flex gap-3">
                                 <div>
-                                    <input type="radio" class="btn-check" name="tipoHoras" id="horasCronologicasRadio"
-                                        value="cronologicas" checked>
+                                    <input type="radio" class="btn-check" name="tipoHoras" id="horasCronologicasRadio" value="cronologicas" checked>
                                     <label class="btn btn-outline-secondary px-4" for="horasCronologicasRadio">
                                         <i class="bi bi-journal-bookmark me-2"></i>Cronológicas
-                                        <span class="badge bg-secondary ms-1" id="badgeHorasCron">
-                                            <%= horasCronologicas %>
-                                        </span>
+                                        <span class="badge bg-secondary ms-1" id="badgeHorasCron"><%= horasCronologicas %></span>
                                     </label>
                                 </div>
                                 <div>
-                                    <input type="radio" class="btn-check" name="tipoHoras" id="horasAcademicasRadio"
-                                        value="academicas">
+                                    <input type="radio" class="btn-check" name="tipoHoras" id="horasAcademicasRadio" value="academicas">
                                     <label class="btn btn-outline-secondary px-4" for="horasAcademicasRadio">
                                         <i class="bi bi-hourglass-split me-2"></i>Académicas
-                                        <span class="badge bg-secondary ms-1" id="badgeHorasAcad">
-                                            <%= horasAcademicas %>
-                                        </span>
+                                        <span class="badge bg-secondary ms-1" id="badgeHorasAcad"><%= horasAcademicas %></span>
                                     </label>
                                 </div>
                             </div>
                             <div class="mt-2 text-muted small" id="notaHoras">
                                 <i class="bi bi-info-circle me-1"></i>
-                                Se imprimirá: <strong id="textoHorasSeleccionadas">
-                                    <%= horasAcademicas %> horas académicas
-                                </strong>
+                                Se imprimirá: <strong id="textoHorasSeleccionadas"><%= horasAcademicas %> horas académicas</strong>
                             </div>
                         </div>
-
-                        <!-- ── FECHA DE EMISIÓN ── -->
                         <div class="col-12 mt-3">
-                            <h6 class="fw-bold mb-2"><i class="bi bi-calendar-event me-2"></i>Fecha de emisión del
-                                certificado</h6>
-                            <div class="input-group" style="max-width: 320px;">
+                            <h6 class="fw-bold mb-2"><i class="bi bi-calendar-event me-2"></i>Fecha de emisión del certificado</h6>
+                            <div class="input-group" style="max-width:320px;">
                                 <span class="input-group-text"><i class="bi bi-calendar3"></i></span>
                                 <input type="date" id="inputFechaEmision" class="form-control"
                                     value="<%= new Date().toISOString().split('T')[0] %>">
                             </div>
-                            <div class="text-muted small mt-1">
-                                Se imprimirá: <strong id="textoFechaEmision"></strong>
-                            </div>
+                            <div class="text-muted small mt-1">Se imprimirá: <strong id="textoFechaEmision"></strong></div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- ── FIRMA (solo visible en modo Certificado) ── -->
+            <!-- FIRMA -->
             <div class="firma-container shadow-sm" id="seccionFirma">
                 <div class="row align-items-center">
                     <div class="col-md-7">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <h5 class="fw-bold mb-0"><i class="bi bi-pencil-square me-2"></i>Firma del Instructor</h5>
                             <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="switchIncluirFirma" checked
-                                    onchange="toggleFirmaVisibilidad()">
-                                <label class="form-check-label small fw-bold" for="switchIncluirFirma">Incluir en
-                                    certificado</label>
+                                <input class="form-check-input" type="checkbox" id="switchIncluirFirma" checked onchange="toggleFirmaVisibilidad()">
+                                <label class="form-check-label small fw-bold" for="switchIncluirFirma">Incluir en certificado</label>
                             </div>
                         </div>
-                        <p class="text-muted small">Sube el PNG de la firma. Si desactivas el switch, <b>desaparecerá
-                                todo el bloque del instructor</b> (línea y nombre) en el PDF.</p>
-                        <input type="file" id="inputFirma" class="form-control" accept="image/png"
-                            onchange="previsualizarFirma(this)">
+                        <p class="text-muted small">Sube el PNG de la firma. Si desactivas el switch, <b>desaparecerá todo el bloque del instructor</b> (línea y nombre) en el PDF.</p>
+                        <input type="file" id="inputFirma" class="form-control" accept="image/png" onchange="previsualizarFirma(this)">
                     </div>
                     <div class="col-md-5 text-center">
                         <div class="preview-box" id="previewBoxFirma">
@@ -287,7 +358,7 @@
                 </div>
             </div>
 
-            <!-- ── TABLA DE ALUMNOS ── -->
+            <!-- TABLA ALUMNOS -->
             <div class="card shadow-sm">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
                     <span class="fw-bold text-muted">LISTADO DE ALUMNOS</span>
@@ -300,8 +371,7 @@
                     <thead class="table-dark">
                         <tr>
                             <th width="50" class="text-center">
-                                <input type="checkbox" id="selectAll" class="form-check-input"
-                                    onclick="toggleAll(this)">
+                                <input type="checkbox" id="selectAll" class="form-check-input" onclick="toggleAll(this)">
                             </th>
                             <th>CÓDIGO NH</th>
                             <th>APELLIDOS Y NOMBRES</th>
@@ -310,28 +380,25 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <% alumnos.forEach(alu=> { %>
-                            <tr>
-                                <td class="text-center">
-                                    <input type="checkbox" class="alumno-check form-check-input"
-                                        data-nombre="<%= alu.nombre %>" data-codigo="<%= alu.codigo %>"
-                                        onchange="actualizarContador()">
-                                </td>
-                                <td><code class="fw-bold text-primary"><%= alu.codigo %></code></td>
-                                <td class="fw-semibold">
-                                    <%= alu.nombre %>
-                                </td>
-                                <td class="text-center">
-                                    <span class="badge rounded-pill badge-pendiente status-badge">Pendiente</span>
-                                </td>
-                                <td class="text-center">
-                                    <button class="btn btn-sm btn-outline-primary" title="Descargar"
-                                        onclick="descargarUno(this)">
-                                        <i class="bi bi-download"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            <% }) %>
+                        <% alumnos.forEach(alu => { %>
+                        <tr>
+                            <td class="text-center">
+                                <input type="checkbox" class="alumno-check form-check-input"
+                                    data-nombre="<%= alu.nombre %>" data-codigo="<%= alu.codigo %>"
+                                    onchange="actualizarContador()">
+                            </td>
+                            <td><code class="fw-bold text-primary"><%= alu.codigo %></code></td>
+                            <td class="fw-semibold"><%= alu.nombre %></td>
+                            <td class="text-center">
+                                <span class="badge rounded-pill badge-pendiente status-badge">Pendiente</span>
+                            </td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-outline-primary" title="Descargar" onclick="descargarUno(this)">
+                                    <i class="bi bi-download"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <% }) %>
                     </tbody>
                 </table>
             </div>
@@ -341,6 +408,133 @@
             </button>
 
             <% } %>
+        </div>
+    </div>
+
+    <!-- ═══════════════ PÁGINA: CONFIGURACIÓN CLASE ═══════════════ -->
+    <div id="page-config-clase" class="page-section">
+        <div class="container py-2" style="max-width:960px">
+
+            <div class="config-header shadow-sm">
+                <h4><i class="bi bi-gear-fill me-2"></i>Configuración de Clase</h4>
+                <p class="mb-0 mt-1 opacity-75 small">Busca una clase por su ID de MatrixLMS y edita sus campos</p>
+            </div>
+
+            <!-- Buscador -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-8">
+                            <label class="form-label fw-bold">ID de Clase — MatrixLMS</label>
+                            <input type="text" id="cfgCursoId" class="form-control form-control-lg" placeholder="Ej: 2287015">
+                        </div>
+                        <div class="col-md-4">
+                            <button class="btn btn-primary btn-lg w-100" onclick="cargarClase()">
+                                <i class="bi bi-search"></i> Cargar Clase
+                            </button>
+                        </div>
+                    </div>
+                    <div id="cfgError" class="alert alert-danger mt-3 d-none"></div>
+                </div>
+            </div>
+
+            <!-- Datos de la clase (oculto hasta cargar) -->
+            <div id="cfgDatos" class="d-none">
+
+                <!-- Info resumen -->
+                <div class="nh-header shadow-sm mb-4" id="cfgResumenHeader">
+                    <h4 id="cfgNombreClase" class="mb-1"></h4>
+                    <div class="mt-2" id="cfgInfoPills"></div>
+                </div>
+
+                <!-- ── EDITAR short_description ── -->
+                <div class="field-card card mb-4 position-relative">
+                    <div id="loadingDesc" class="loading-overlay">
+                        <div class="spinner-border text-primary"></div>
+                    </div>
+                    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-text-paragraph me-2"></i>Descripción Corta (short_description)</span>
+                        <span id="statusDesc" class="badge bg-secondary api-status-badge">Sin cambios</span>
+                    </div>
+                    <div class="card-body p-4">
+                        <textarea id="inputShortDesc" class="form-control" rows="6"
+                            style="font-family: monospace; font-size: 0.85rem;"></textarea>
+                        <div class="d-flex gap-2 mt-3">
+                            <button class="btn btn-success" onclick="guardarShortDesc()">
+                                <i class="bi bi-cloud-upload-fill me-2"></i>Guardar en MatrixLMS
+                            </button>
+                            <button class="btn btn-outline-secondary" onclick="restaurarShortDesc()">
+                                <i class="bi bi-arrow-counterclockwise me-2"></i>Restaurar original
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── GENERADOR DE SESIONES ── -->
+                <div class="field-card card mb-5">
+                    <div class="card-header py-3">
+                        <i class="bi bi-calendar3-week me-2"></i>Generador de Sesiones
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-4">
+
+                            <!-- Fecha de inicio -->
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Fecha de inicio</label>
+                                <input type="date" id="sesionFechaInicio" class="form-control" oninput="previewSesiones()">
+                            </div>
+
+                            <!-- Cantidad de sesiones -->
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Número de sesiones</label>
+                                <input type="number" id="sesionCantidad" class="form-control" min="1" max="100"
+                                    placeholder="Ej: 18" oninput="previewSesiones()">
+                            </div>
+
+                            <!-- Horario -->
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Horario</label>
+                                <div class="input-group">
+                                    <input type="time" id="sesionHoraInicio" class="form-control" value="19:30" oninput="previewSesiones()">
+                                    <span class="input-group-text">a</span>
+                                    <input type="time" id="sesionHoraFin" class="form-control" value="22:30" oninput="previewSesiones()">
+                                </div>
+                            </div>
+
+                            <!-- Días de la semana -->
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Frecuencia — Días de la semana</label>
+                                <div class="day-btn-group d-flex flex-wrap gap-2" id="diasSemana">
+                                    <div><input type="checkbox" class="btn-check" id="dia1" value="1" onchange="previewSesiones()"><label class="btn btn-outline-secondary" for="dia1">Lun</label></div>
+                                    <div><input type="checkbox" class="btn-check" id="dia2" value="2" onchange="previewSesiones()"><label class="btn btn-outline-secondary" for="dia2">Mar</label></div>
+                                    <div><input type="checkbox" class="btn-check" id="dia3" value="3" onchange="previewSesiones()"><label class="btn btn-outline-secondary" for="dia3">Mié</label></div>
+                                    <div><input type="checkbox" class="btn-check" id="dia4" value="4" onchange="previewSesiones()"><label class="btn btn-outline-secondary" for="dia4">Jue</label></div>
+                                    <div><input type="checkbox" class="btn-check" id="dia5" value="5" onchange="previewSesiones()"><label class="btn btn-outline-secondary" for="dia5">Vie</label></div>
+                                    <div><input type="checkbox" class="btn-check" id="dia6" value="6" onchange="previewSesiones()"><label class="btn btn-outline-secondary" for="dia6">Sáb</label></div>
+                                    <div><input type="checkbox" class="btn-check" id="dia0" value="0" onchange="previewSesiones()"><label class="btn btn-outline-secondary" for="dia0">Dom</label></div>
+                                </div>
+                            </div>
+
+                            <!-- Preview -->
+                            <div class="col-12" id="sesionPreviewSection" style="display:none;">
+                                <label class="form-label fw-semibold">Vista previa del texto generado</label>
+                                <div class="sesion-preview-box" id="sesionPreviewBox"></div>
+                                <div class="d-flex gap-2 mt-3">
+                                    <button class="btn btn-primary" onclick="insertarSesionesEnDesc()">
+                                        <i class="bi bi-clipboard-plus me-2"></i>Insertar en Descripción Corta
+                                    </button>
+                                    <button class="btn btn-outline-secondary" onclick="copiarSesiones()">
+                                        <i class="bi bi-copy me-2"></i>Copiar texto
+                                    </button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
     </div>
 
     <!-- Toast -->
@@ -355,6 +549,19 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // ══════════════════════════════════════════════════
+        //  NAVEGACIÓN
+        // ══════════════════════════════════════════════════
+        function showPage(pageId, linkEl) {
+            document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nh-navbar .nav-link').forEach(l => l.classList.remove('active'));
+            document.getElementById('page-' + pageId).classList.add('active');
+            if (linkEl) linkEl.classList.add('active');
+        }
+
+        // ══════════════════════════════════════════════════
+        //  CERTIFICACIONES (código original)
+        // ══════════════════════════════════════════════════
         const CURSO_DATA = {
             cursoNombre: "<%= cursoNombre %>",
             docenteNombre: "<%= docenteNombre %>",
@@ -366,7 +573,6 @@
 
         let FIRMA_BASE64 = "";
 
-        // ── Selector de tipo de horas ─────────────────────────────────────
         document.querySelectorAll('input[name="tipoHoras"]').forEach(radio => {
             radio.addEventListener('change', () => {
                 const esAcademicas = document.getElementById('horasAcademicasRadio').checked;
@@ -385,13 +591,11 @@
             return document.getElementById('horasAcademicasRadio').checked ? 'académicas' : 'cronológicas';
         }
 
-        // ── Selector de tipo de documento ────────────────────────────────
         document.querySelectorAll('input[name="tipoDoc"]').forEach(radio => {
             radio.addEventListener('change', () => {
                 const esCertificado = document.getElementById('tipoCertificado').checked;
                 document.getElementById('seccionFirma').style.display = esCertificado ? 'block' : 'none';
                 document.getElementById('notaConstancia').classList.toggle('d-none', esCertificado);
-
                 const badge = document.getElementById('tipoBadge');
                 if (esCertificado) {
                     badge.textContent = 'CERTIFICADO';
@@ -407,11 +611,10 @@
             return document.querySelector('input[name="tipoDoc"]:checked').value;
         }
 
-        // ── Gestión de Firma ──────────────────────────────────────────────
         function previsualizarFirma(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
-                reader.onload = function (e) {
+                reader.onload = function(e) {
                     FIRMA_BASE64 = e.target.result;
                     document.getElementById('imgPreview').src = e.target.result;
                     document.getElementById('imgPreview').style.display = 'block';
@@ -428,47 +631,35 @@
                 isChecked ? "info" : "warning");
         }
 
-        // ── Descarga de PDF ──────────────────────────────────────────────
         async function descargarPDF(datos, fila) {
             setBadge(fila, 'procesando');
-
             const tipo = getTipoDocumento();
             const incluirFirma = document.getElementById('switchIncluirFirma').checked;
             const firmaAEnviar = (tipo === 'certificado' && incluirFirma) ? FIRMA_BASE64 : "";
-
             const payload = {
                 ...datos,
                 creditos: getCreditosSeleccionados(),
                 tipoHoras: getTipoHorasLabel(),
                 firmaManual: firmaAEnviar,
                 tipo,
-                fechaEmision: getFechaEmision()   
+                fechaEmision: getFechaEmision()
             };
-
-            const endpoint = tipo === 'constancia'
-                ? '/api/generar-pdf-individual-constancia'
-                : '/api/generar-pdf-individual';
-
+            const endpoint = tipo === 'constancia' ? '/api/generar-pdf-individual-constancia' : '/api/generar-pdf-individual';
             try {
                 const res = await fetch(endpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-
                 if (!res.ok) throw new Error(await res.text());
-
                 const blob = await res.blob();
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
                 const prefijo = tipo === 'constancia' ? 'Constancia' : 'Certificado';
                 a.download = `${prefijo}_${datos.nombre.replace(/ /g, '_')}.pdf`;
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
+                document.body.appendChild(a); a.click(); a.remove();
                 URL.revokeObjectURL(url);
-
                 setBadge(fila, 'ok');
             } catch (e) {
                 setBadge(fila, 'error');
@@ -476,7 +667,6 @@
             }
         }
 
-        // ── Funciones de Tabla ────────────────────────────────────────────
         function toggleAll(src) {
             document.querySelectorAll('.alumno-check').forEach(c => {
                 c.checked = src.checked;
@@ -500,21 +690,16 @@
                 docente: CURSO_DATA.docenteNombre,
                 inicio: CURSO_DATA.fechaInicio,
                 fin: CURSO_DATA.fechaFin
-                // creditos se inyecta en descargarPDF dinámicamente
             };
             descargarPDF(datos, fila);
         }
 
         async function certificarSeleccionados() {
             const checks = document.querySelectorAll('.alumno-check:checked');
-            if (checks.length === 0) {
-                mostrarToast('Selecciona al menos un alumno.', 'warning');
-                return;
-            }
+            if (checks.length === 0) { mostrarToast('Selecciona al menos un alumno.', 'warning'); return; }
             const tipo = getTipoDocumento();
             const label = tipo === 'constancia' ? 'constancia(s)' : 'certificado(s)';
             if (!confirm(`¿Generar ${checks.length} ${label}?`)) return;
-
             for (const check of checks) {
                 const fila = check.closest('tr');
                 const datos = {
@@ -524,13 +709,11 @@
                     docente: CURSO_DATA.docenteNombre,
                     inicio: CURSO_DATA.fechaInicio,
                     fin: CURSO_DATA.fechaFin
-                    // creditos se inyecta en descargarPDF dinámicamente
                 };
                 await descargarPDF(datos, fila);
             }
         }
 
-        // ── Edición de nombre del curso ───────────────────────────────────
         function habilitarEdicionCurso() {
             document.getElementById('displayCursoNombre').classList.add('d-none');
             document.getElementById('btnEditarCurso').classList.add('d-none');
@@ -570,18 +753,20 @@
             bootstrap.Toast.getOrCreateInstance(el, { delay: 4000 }).show();
         }
 
-        // Inicializar texto de fecha
         function actualizarTextoFecha() {
             const val = document.getElementById('inputFechaEmision').value;
             if (!val) return;
             const [y, m, d] = val.split('-');
-            const fecha = new Date(y, m - 1, d); // evita problemas de timezone
+            const fecha = new Date(y, m - 1, d);
             document.getElementById('textoFechaEmision').textContent =
                 fecha.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
         }
 
-        document.getElementById('inputFechaEmision').addEventListener('change', actualizarTextoFecha);
-        actualizarTextoFecha(); // ejecutar al cargar
+        const inputFechaEmision = document.getElementById('inputFechaEmision');
+        if (inputFechaEmision) {
+            inputFechaEmision.addEventListener('change', actualizarTextoFecha);
+            actualizarTextoFecha();
+        }
 
         function getFechaEmision() {
             const val = document.getElementById('inputFechaEmision').value;
@@ -590,7 +775,191 @@
             const fecha = new Date(y, m - 1, d);
             return fecha.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
         }
+
+
+        // ══════════════════════════════════════════════════
+        //  CONFIGURACIÓN CLASE
+        // ══════════════════════════════════════════════════
+        let cfgClaseData = null;
+        let cfgShortDescOriginal = "";
+
+        async function cargarClase() {
+            const id = document.getElementById('cfgCursoId').value.trim();
+            if (!id) { mostrarToast('Ingresa un ID de clase', 'warning'); return; }
+
+            document.getElementById('cfgError').classList.add('d-none');
+            document.getElementById('cfgDatos').classList.add('d-none');
+
+            try {
+                const res = await fetch(`/api/clase/${id}`);
+                if (!res.ok) throw new Error(`Error ${res.status}: ${await res.text()}`);
+                cfgClaseData = await res.json();
+            } catch (e) {
+                document.getElementById('cfgError').textContent = 'No se pudo cargar la clase: ' + e.message;
+                document.getElementById('cfgError').classList.remove('d-none');
+                return;
+            }
+
+            // Rellenar UI
+            document.getElementById('cfgNombreClase').innerHTML =
+                `<i class="bi bi-mortarboard-fill me-2"></i>${cfgClaseData.name}`;
+
+            const pills = document.getElementById('cfgInfoPills');
+            pills.innerHTML = `
+                <span class="info-pill"><i class="bi bi-hash me-1"></i>ID: ${cfgClaseData.id}</span>
+                <span class="info-pill"><i class="bi bi-calendar-range me-1"></i>${cfgClaseData.start_at || '—'} — ${cfgClaseData.finish_at || '—'}</span>
+                <span class="info-pill"><i class="bi bi-clock me-1"></i>${cfgClaseData.credits || '—'} créditos</span>
+                <span class="info-pill"><i class="bi bi-people-fill me-1"></i>${cfgClaseData.used_seats || 0} inscritos</span>
+            `;
+
+            cfgShortDescOriginal = cfgClaseData.short_description || "";
+            document.getElementById('inputShortDesc').value = cfgShortDescOriginal;
+            document.getElementById('statusDesc').textContent = 'Sin cambios';
+            document.getElementById('statusDesc').className = 'badge bg-secondary api-status-badge';
+
+            // Pre-rellenar fecha de inicio en el generador de sesiones
+            if (cfgClaseData.start_at) {
+                document.getElementById('sesionFechaInicio').value = cfgClaseData.start_at;
+            }
+
+            document.getElementById('cfgDatos').classList.remove('d-none');
+            previewSesiones();
+            mostrarToast('Clase cargada correctamente', 'success');
+        }
+
+        async function guardarShortDesc() {
+            if (!cfgClaseData) return;
+            const nuevoTexto = document.getElementById('inputShortDesc').value;
+            const id = cfgClaseData.id;
+
+            document.getElementById('loadingDesc').classList.add('show');
+            document.getElementById('statusDesc').textContent = 'Guardando...';
+            document.getElementById('statusDesc').className = 'badge bg-warning text-dark api-status-badge';
+
+            try {
+                const res = await fetch(`/api/clase/${id}/short-description`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ short_description: nuevoTexto })
+                });
+                if (!res.ok) throw new Error(await res.text());
+
+                cfgShortDescOriginal = nuevoTexto;
+                cfgClaseData.short_description = nuevoTexto;
+                document.getElementById('statusDesc').textContent = '✅ Guardado';
+                document.getElementById('statusDesc').className = 'badge bg-success api-status-badge';
+                mostrarToast('Descripción actualizada en MatrixLMS', 'success');
+            } catch (e) {
+                document.getElementById('statusDesc').textContent = '❌ Error';
+                document.getElementById('statusDesc').className = 'badge bg-danger api-status-badge';
+                mostrarToast('Error al guardar: ' + e.message, 'danger');
+            } finally {
+                document.getElementById('loadingDesc').classList.remove('show');
+            }
+        }
+
+        function restaurarShortDesc() {
+            document.getElementById('inputShortDesc').value = cfgShortDescOriginal;
+            document.getElementById('statusDesc').textContent = 'Sin cambios';
+            document.getElementById('statusDesc').className = 'badge bg-secondary api-status-badge';
+            mostrarToast('Descripción restaurada al original', 'info');
+        }
+
+        // ── Generador de Sesiones ──────────────────────────
+        const DIAS_ES = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+        const MESES_ES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
+        function getSelectedDias() {
+            return Array.from(document.querySelectorAll('#diasSemana .btn-check:checked'))
+                .map(c => parseInt(c.value))
+                .sort((a, b) => {
+                    // Ordenar: lunes(1)..sábado(6)..domingo(0)
+                    const order = [1,2,3,4,5,6,0];
+                    return order.indexOf(a) - order.indexOf(b);
+                });
+        }
+
+        function formatearHora(timeStr) {
+            // timeStr = "19:30" → "19:30"
+            return timeStr;
+        }
+
+        function generarSesiones() {
+            const fechaStr = document.getElementById('sesionFechaInicio').value;
+            const cantidad = parseInt(document.getElementById('sesionCantidad').value);
+            const horaIni = document.getElementById('sesionHoraInicio').value;
+            const horaFin = document.getElementById('sesionHoraFin').value;
+            const dias = getSelectedDias();
+
+            if (!fechaStr || !cantidad || dias.length === 0 || !horaIni || !horaFin) return [];
+
+            const sesiones = [];
+            const [y, m, d] = fechaStr.split('-').map(Number);
+            let current = new Date(y, m - 1, d);
+            let count = 0;
+
+            while (count < cantidad) {
+                const dow = current.getDay(); // 0=dom, 1=lun...
+                if (dias.includes(dow)) {
+                    sesiones.push(new Date(current));
+                    count++;
+                }
+                current.setDate(current.getDate() + 1);
+            }
+
+            return sesiones.map((fecha, i) => {
+                const dia = DIAS_ES[fecha.getDay()];
+                const numDia = fecha.getDate();
+                const mes = MESES_ES[fecha.getMonth()];
+                const anio = fecha.getFullYear();
+                return `${i + 1}. ${dia}, ${numDia} de ${mes} de ${anio} ${horaIni} - ${horaFin}`;
+            });
+        }
+
+        let _sesionesActuales = [];
+
+        function previewSesiones() {
+            _sesionesActuales = generarSesiones();
+            const section = document.getElementById('sesionPreviewSection');
+            const box = document.getElementById('sesionPreviewBox');
+
+            if (_sesionesActuales.length === 0) {
+                section.style.display = 'none';
+                return;
+            }
+
+            section.style.display = 'block';
+            box.innerHTML = 'Horarios de las sesiones (GMT - 5)<br>' +
+                _sesionesActuales.map(s => `<div class="sesion-preview-item">${s}</div>`).join('');
+        }
+
+        function getSesionesTexto() {
+            if (_sesionesActuales.length === 0) return '';
+            return 'Horarios de las sesiones (GMT - 5)\r\n' + _sesionesActuales.join('\r\n');
+        }
+
+        function insertarSesionesEnDesc() {
+            const texto = getSesionesTexto();
+            if (!texto) { mostrarToast('Genera las sesiones primero', 'warning'); return; }
+            const ta = document.getElementById('inputShortDesc');
+            // Reemplazar bloque de sesiones si existe, o insertar al inicio
+            const existente = ta.value;
+            const regexSesiones = /Horarios de las sesiones[\s\S]*?(?=\r?\n\r?\n[A-Z]|$)/i;
+            if (regexSesiones.test(existente)) {
+                ta.value = existente.replace(regexSesiones, texto);
+            } else {
+                ta.value = texto + (existente ? '\r\n\r\n' + existente : '');
+            }
+            document.getElementById('statusDesc').textContent = 'Modificado';
+            document.getElementById('statusDesc').className = 'badge bg-warning text-dark api-status-badge';
+            mostrarToast('Sesiones insertadas en la descripción', 'success');
+        }
+
+        function copiarSesiones() {
+            const texto = getSesionesTexto();
+            if (!texto) { mostrarToast('Genera las sesiones primero', 'warning'); return; }
+            navigator.clipboard.writeText(texto).then(() => mostrarToast('Texto copiado al portapapeles', 'success'));
+        }
     </script>
 </body>
-
 </html>

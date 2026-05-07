@@ -21,6 +21,8 @@ const API_KEY = '4ea187998ed58eb48fae278a457fc57f023eb5277de7139943b6';
 const DOMINIO = 'https://newhorizonsperu.matrixlms.com';
 const CARPETA_CERTIFICADOS = path.join(__dirname, 'certificados_generados');
 
+const QR_GLOBAL_PATH = path.join(__dirname, 'public/images/codeqr.png');
+
 if (!fsSync.existsSync(CARPETA_CERTIFICADOS)) {
     fsSync.mkdirSync(CARPETA_CERTIFICADOS, { recursive: true });
 }
@@ -69,6 +71,20 @@ function renderizarCertificado(app, datos) {   // ← quita el parámetro req
     const fondoBase64 = fsSync.readFileSync(fondoPath, { encoding: 'base64' });
     const fondoSrc = `data:image/png;base64,${fondoBase64}`;
 
+    // --- LÓGICA PARA EL QR GLOBAL ---
+    let qrSrc = "";
+    // Verificamos si en los datos viene la instrucción de incluir QR
+    if (datos.incluirQR === 'on' || datos.incluirQR === 'true' || datos.incluirQR === true) {
+        try {
+            // Usamos el nombre del archivo que subiste
+            const qrPath = path.join(__dirname, 'public', 'images', 'codeqr.png');
+            const qrBase64 = fsSync.readFileSync(qrPath, { encoding: 'base64' });
+            qrSrc = `data:image/png;base64,${qrBase64}`;
+        } catch (err) {
+            console.error("Error al cargar el archivo QR PNG:", err);
+        }
+    }
+
     return new Promise((resolve, reject) => {
         app.render('certificado', {
             nombreAlumno: datos.nombre,
@@ -82,6 +98,7 @@ function renderizarCertificado(app, datos) {   // ← quita el parámetro req
             logoSrc,
             firmaFijaSrc,
             fondoSrc,
+            qrSrc: qrSrc,
             firmaDocenteSrc: datos.firmaManual || "",
             fechaEmision: datos.fechaEmision || getFechaHoy()  // ← lee de datos, no de req
         }, (err, html) => {
@@ -265,7 +282,7 @@ app.post('/api/generar-pdf-individual-constancia', async (req, res) => {
 
 // --- GENERAR LOTE (certificados o constancias) ---
 app.post('/api/generar-lote', async (req, res) => {
-    const { alumnos, cursoNombre, docenteNombre, fechaInicio, fechaFin, creditos, firmaManual, tipo } = req.body;
+    const { alumnos, cursoNombre, docenteNombre, fechaInicio, fechaFin, creditos, firmaManual, tipo, incluirQR } = req.body;
     if (!alumnos || alumnos.length === 0) return res.status(400).json({ error: 'Sin alumnos.' });
 
     const esConstancia = tipo === 'constancia';
@@ -281,7 +298,8 @@ app.post('/api/generar-lote', async (req, res) => {
                 inicio: fechaInicio,
                 fin: fechaFin,
                 creditos,
-                firmaManual: esConstancia ? "" : firmaManual
+                firmaManual: esConstancia ? "" : firmaManual,
+                incluirQR: incluirQR
             };
             const html = esConstancia
                 ? await renderizarConstancia(app, datos)

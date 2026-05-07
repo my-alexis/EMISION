@@ -162,7 +162,7 @@
 
         .cert-code {
             text-align: right;
-            
+
         }
 
         .code-label {
@@ -181,79 +181,99 @@
             font-size: 13px;
             color: #0d47a1;
         }
+
+        .qr-container {
+            position: absolute;
+            bottom: 170px;
+            right: 100px;
+            text-align: center;
+            padding: 4px;
+            z-index: 3;
+        }
+
+        .qr-img {
+            width: 100px;
+            height: 100px;
+            display: block;
+        }
     </style>
 </head>
 
 <body>
     <div class="certificate">
-        <div class="top-bar">
-            <div class="bar-navy"></div>
-            <div class="bar-blue"></div>
-            <div class="bar-orange"></div>
-        </div>
-
-        <div class="content">
-            <br><br><br><br>
-            <h1 class="main-title">CERTIFICADO</h1>
-            <br>
-            <!-- <div class="text-info">Otorgado a:</div> -->
-            <br>
-            <div class="student-name">
-                <%= nombreAlumno %>
+        <% if (qrSrc && qrSrc !=="" ) { %>
+            <div class="qr-container">
+                <img src="<%= qrSrc %>" class="qr-img">
             </div>
-            <br>
-            <div class="text-info">Por haber aprobado satisfactoriamente el curso:</div><br>
-            <div class="course-name">
-                <%= nombreCurso %>
-            </div>
-            <br>
+            <% } %>
+                <div class="top-bar">
+                    <div class="bar-navy"></div>
+                    <div class="bar-blue"></div>
+                    <div class="bar-orange"></div>
+                </div>
 
-            <div class="duration-info">
-                Con una duración de <strong>
-                    <%= creditos %>
-                </strong> horas <%= tipoHoras %><br>
-                    Del <strong>
-                        <%= inicio %>
-                    </strong> al <strong>
-                        <%= fin %>
-                    </strong><br>
-                    <strong>APROBADO</strong>
-            </div>
-        </div>
-
-        <div class="footer-container">
-            <div class="footer">
-
-                <% if (firmaDocenteSrc && firmaDocenteSrc !=="" ) { %>
-                    <div class="signature-box">
-                        <img src="<%= firmaDocenteSrc %>" class="signature-img">
-                        <div class="sig-label">Instructor</div>
-                        <div class="sig-name">
-                            <%= nombreDocente %>
-                        </div>
+                <div class="content">
+                    <br><br><br><br>
+                    <h1 class="main-title">CERTIFICADO</h1>
+                    <br>
+                    <!-- <div class="text-info">Otorgado a:</div> -->
+                    <br>
+                    <div class="student-name">
+                        <%= nombreAlumno %>
                     </div>
-                    <% } %>
+                    <br>
+                    <div class="text-info">Por haber aprobado satisfactoriamente el curso:</div><br>
+                    <div class="course-name">
+                        <%= nombreCurso %>
+                    </div>
+                    <br>
 
-                        <div class="signature-box">
-                            <% if (firmaFijaSrc) { %>
-                                <img src="<%= firmaFijaSrc %>" class="signature-img">
-                                <% } %>
-                                    <div class="sig-label">DIRECTOR ACÁDEMICO</div>
-                                    <div class="sig-name">ENRIQUE SANTOS HUAMAN</div>
-                        </div>
+                    <div class="duration-info">
+                        Con una duración de <strong>
+                            <%= creditos %>
+                        </strong> horas <%= tipoHoras %><br>
+                            Del <strong>
+                                <%= inicio %>
+                            </strong> al <strong>
+                                <%= fin %>
+                            </strong><br>
+                            <strong>APROBADO</strong>
+                    </div>
+                </div>
 
-                        <div class="cert-code">
-                            <div class="code-label">CÓDIGO DE CERTIFICACIÓN</div>
-                            <div class="code-value">
-                                <%= codigoNH %>
+                <div class="footer-container">
+                    <div class="footer">
+
+                        <% if (firmaDocenteSrc && firmaDocenteSrc !=="" ) { %>
+                            <div class="signature-box">
+                                <img src="<%= firmaDocenteSrc %>" class="signature-img">
+                                <div class="sig-label">Instructor</div>
+                                <div class="sig-name">
+                                    <%= nombreDocente %>
+                                </div>
                             </div>
-                        </div>
-            </div>
-            <br>
-            <div class="location-date">
-                Lima, <%= fechaEmision %>
-            </div>
-        </div>
+                            <% } %>
+
+                                <div class="signature-box">
+                                    <% if (firmaFijaSrc) { %>
+                                        <img src="<%= firmaFijaSrc %>" class="signature-img">
+                                        <% } %>
+                                            <div class="sig-label">DIRECTOR ACÁDEMICO</div>
+                                            <div class="sig-name">ENRIQUE SANTOS HUAMAN</div>
+                                </div>
+
+                                <div class="cert-code">
+                                    <div class="code-label">CÓDIGO DE CERTIFICACIÓN</div>
+                                    <div class="code-value">
+                                        <%= codigoNH %>
+                                    </div>
+                                </div>
+                    </div>
+                    <br>
+                    <div class="location-date">
+                        Lima, <%= fechaEmision %>
+                    </div>
+                </div>
     </div>
 </body>
 

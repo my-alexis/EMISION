@@ -1011,12 +1011,22 @@
             let current = new Date(y, m - 1, d);
             let count = 0;
 
+            // El bucle continuará hasta que hayamos encontrado la cantidad de sesiones solicitadas
             while (count < cantidad) {
                 const dow = current.getDay(); // 0=dom, 1=lun...
+
+                // 1. Verificamos si el día de la semana coincide con la frecuencia seleccionada
                 if (dias.includes(dow)) {
-                    sesiones.push(new Date(current));
-                    count++;
+
+                    // 2. ¡MODIFICACIÓN AQUÍ!: Verificamos si NO es feriado
+                    if (!esFeriado(current)) {
+                        sesiones.push(new Date(current));
+                        count++;
+                    }
+                    // Si es feriado, el código simplemente ignora este día y no aumenta el contador 'count'
                 }
+
+                // Avanzamos al siguiente día calendario
                 current.setDate(current.getDate() + 1);
             }
 
@@ -1072,6 +1082,30 @@
             const texto = getSesionesTexto();
             if (!texto) { mostrarToast('Genera las sesiones primero', 'warning'); return; }
             navigator.clipboard.writeText(texto).then(() => mostrarToast('Texto copiado al portapapeles', 'success'));
+        }
+
+        const FERIADOS_PERU = [
+            '01-01', // Año Nuevo
+            '04-17', // Jueves Santo (Variable, ejemplo 2025/2026)
+            '04-18', // Viernes Santo
+            '05-01', // Día del Trabajo
+            '06-07', // Batalla de Arica
+            '06-29', // San Pedro y San Pablo
+            '07-28', // Fiestas Patrias
+            '07-29', // Fiestas Patrias
+            '08-06', // Batalla de Junín
+            '08-30', // Santa Rosa de Lima
+            '10-08', // Combate de Angamos
+            '11-01', // Todos los Santos
+            '12-08', // Inmaculada Concepción
+            '12-09', // Batalla de Ayacucho
+            '12-25'  // Navidad
+        ];
+
+        function esFeriado(fecha) {
+            const diaMes = (fecha.getMonth() + 1).toString().padStart(2, '0') + '-' +
+                fecha.getDate().toString().padStart(2, '0');
+            return FERIADOS_PERU.includes(diaMes);
         }
     </script>
 </body>

@@ -4,10 +4,13 @@ const express = require('express');
 const multer = require('multer');
 const axios = require('axios');
 const path = require('path');
+const XLSX = require('xlsx');
 const puppeteer = require('puppeteer');
 const fs = require('fs').promises;
 const fsSync = require('fs');
 const { PDFDocument } = require('pdf-lib');
+
+const EXCEL_PATH = path.join(__dirname, 'historico.xlsx');
 
 const app = express();
 app.use(express.static('public'));
@@ -148,6 +151,44 @@ function renderizarConstancia(app, datos) {
     });
 }
 
+
+// --- RENDERIZADO DE CARTA ---
+function renderizarCarta(app, datos) {
+    const fondoPath = path.join(__dirname, 'public', 'images', 'fondo_constancia.png'); // Asegúrate que el nombre coincida
+    const fondoBase64 = fsSync.readFileSync(fondoPath, { encoding: 'base64' });
+    const fondoSrc = `data:image/png;base64,${fondoBase64}`;
+
+    return new Promise((resolve, reject) => {
+        app.render('carta', { // <-- Ahora apunta a carta.ejs
+            nombreAlumno: datos.nombre,
+            nombreCurso: datos.curso,
+            inicio: datos.inicio,
+            fin: datos.fin,
+            nombreDocente: datos.docente,
+            fondoSrc,
+            fechaEmision: datos.fechaEmision || getFechaHoy()
+        }, (err, html) => {
+            if (err) return reject(err);
+            resolve(html);
+        });
+    });
+}
+
+// --- RUTA API CARTA ---
+app.post('/api/generar-pdf-individual-carta', async (req, res) => {
+    try {
+        const html = await renderizarCarta(app, req.body);
+        const pdf = await generarPDF(html, 'portrait'); // Asegura que generarPDF sea tu función con Puppeteer
+        
+        res.contentType("application/pdf");
+        res.send(pdf);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Error interno");
+    }
+});
+
+
 // --- GENERACIÓN DE PDF CON PUPPETEER ---
 async function generarPDF(html, orientacion = 'landscape') {
     const browser = await puppeteer.launch({
@@ -237,7 +278,7 @@ app.post('/buscar', async (req, res) => {
             fechaInicio: formatearFecha(c.start_at),
             fechaFin: formatearFecha(c.finish_at),
             horasAcademicas: c.section_code || "0",
-            horasCronologicas: c.credits  || "0",
+            horasCronologicas: c.credits || "0",
             cursoId,
             total: alumnosFinal.length
         });
@@ -279,6 +320,8 @@ app.post('/api/generar-pdf-individual-constancia', async (req, res) => {
         res.status(500).json({ error: 'Error al generar constancia: ' + e.message });
     }
 });
+
+
 
 // --- GENERAR LOTE (certificados o constancias) ---
 app.post('/api/generar-lote', async (req, res) => {
@@ -341,7 +384,7 @@ app.get('/api/clase/:id', async (req, res) => {
         console.log("Consultando a:", url); // Esto te servirá para ver la URL en la terminal
 
         const respuesta = await axios.get(url);
-        
+
         if (respuesta.data) {
             // Enviamos los datos al frontend (index.ejs)
             res.json(respuesta.data);
@@ -362,9 +405,9 @@ app.patch('/api/clase/:id/short-description', async (req, res) => {
 
     try {
         const url = `${DOMINIO}/api/v3/courses/${cursoId}?api_key=${API_KEY}`;
-        
+
         const respuesta = await axios.patch(url, {
-                short_description: short_description
+            short_description: short_description
         }, {
             headers: {
                 'Content-Type': 'application/json'
@@ -374,12 +417,53 @@ app.patch('/api/clase/:id/short-description', async (req, res) => {
         res.json({ mensaje: "Actualizado con éxito mediante túnel" });
     } catch (e) {
         console.error("Error con alternativa POST:", e.response ? e.response.data : e.message);
-        res.status(500).json({ 
+        res.status(500).json({
             error: "La API sigue rechazando la actualización",
-            detalles: e.response ? e.response.data : e.message 
+            detalles: e.response ? e.response.data : e.message
         });
     }
 });
+
+
+app.get('/api/historico', async (req, res) => {
+    try {
+        const search = (req.query.search || '').toLowerCase().trim();
+
+        // LOG EN CONSOLA (Terminal)
+        console.log(`🔎 Buscando en histórico: "${search}"`);
+
+        if (!search) {
+            return res.json([]);
+        }
+
+        const workbook = XLSX.readFile('./historico.xlsx');
+        const sheet = workbook.Sheets['HISTORICO'];
+        const data = XLSX.utils.sheet_to_json(sheet);
+
+        const filtrados = data.filter(row => {
+            // Asegúrate de que 'DATA ALUMNO' sea el nombre exacto de la columna en tu Excel
+            const alumno = (row['DATA ALUMNO'] || '').toLowerCase();
+            return alumno.includes(search);
+        });
+
+        const resultado = filtrados.map(row => ({
+            alumno: row['DATA ALUMNO'] || 'Sin nombre', // Usamos 'alumno' como clave
+            curso: row['Curso'] || '',
+            inicio: row['Inicio'] || '',
+            fin: row['Fin'] || '',
+            docente: row['DATA DOCENTE'] || ''
+        }));
+
+        console.log(`✅ Resultados encontrados: ${resultado.length}`);
+        res.json(resultado);
+    } catch (error) {
+        console.error("Error al leer histórico:", error);
+        res.status(500).json({ error: "Error interno" });
+    }
+});
+
+
+
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Servidor Shukita v2 disponible en puerto ${PORT}`);
 });

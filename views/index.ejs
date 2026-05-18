@@ -270,6 +270,11 @@
                         <i class="bi bi-gear-fill"></i>Configuración Clase
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="showPage('historico', this)">
+                        <i class="bi bi-search"></i> Histórico
+                    </a>
+                </li>
             </ul>
         </div>
     </nav>
@@ -647,6 +652,47 @@
             </div>
         </div>
     </div>
+
+    <!-- ═══════════════ PÁGINA: HISTORICO ═══════════════ -->
+    <!-- ═══════════════ PÁGINA: HISTORICO ═══════════════ -->
+    <div id="page-historico" class="page-section">
+        <div class="container py-2" style="max-width:960px">
+
+            <div class="card shadow-sm p-4">
+                <h3 class="mb-4">
+                    <i class="bi bi-search"></i> Buscador Histórico (Excel)
+                </h3>
+                <span id="estadoBusqueda" class="ms-2 fw-bold"></span>
+                <div class="input-group mb-3">
+                    <input type="text" id="inputBusqueda" class="form-control"
+                        placeholder="Ingrese nombre o apellido para buscar...">
+
+                    <button class="btn btn-primary" onclick="buscarEnExcel()">
+                        <i class="bi bi-search"></i> Buscar
+                    </button>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover mt-3">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Alumno</th>
+                                <th>Curso</th>
+                                <th>Inicio</th>
+                                <th>Fin</th>
+                                <th>Docente</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaHistorico"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
 
     <!-- Toast -->
     <div class="position-fixed top-0 end-0 p-3" style="z-index:2000">
@@ -1107,6 +1153,117 @@
                 fecha.getDate().toString().padStart(2, '0');
             return FERIADOS_PERU.includes(diaMes);
         }
+        async function buscarEnExcel() {
+            const input = document.getElementById('inputBusqueda');
+            const search = input.value.trim();
+            const estado = document.getElementById('estadoBusqueda');
+            const tabla = document.getElementById('tablaHistorico');
+
+            if (!search) {
+                tabla.innerHTML = '';
+                estado.innerText = '';
+                return;
+            }
+
+            // Mostrar estado de carga
+            estado.className = "ms-2 text-primary";
+            estado.innerText = "⏳ Buscando...";
+
+            try {
+                const res = await fetch(`/api/historico?search=${encodeURIComponent(search)}`);
+                const data = await res.json();
+
+                if (data.length === 0) {
+                    estado.className = "ms-2 text-danger";
+                    estado.innerText = "❌ Sin resultados";
+                    tabla.innerHTML = `<tr><td colspan="6" class="text-center">No se encontraron coincidencias</td></tr>`;
+                    return;
+                }
+
+                // Mostrar cantidad de resultados
+                estado.className = "ms-2 text-success";
+                estado.innerText = `✅ Resultados: ${data.length}`;
+
+                tabla.innerHTML = data.map(item => `
+                <tr>
+                <td>${item.alumno}</td>
+                <td>${item.curso}</td>
+                <td>${item.inicio}</td>
+                <td>${item.fin}</td>
+                <td>${item.docente}</td>
+
+                <td>
+                    <button class="btn btn-sm btn-danger"
+                        onclick="generarCartaDesdeHistorico(
+                            '${item.alumno}',
+                            '${item.curso}',
+                            '${item.inicio}',
+                            '${item.fin}',
+                            '${item.docente}'
+                        )">
+
+                        <i class="bi bi-file-earmark-pdf"></i>
+                        PDF
+                    </button>
+                </td>
+                </tr>
+        `).join('');
+
+            } catch (err) {
+                estado.innerText = "⚠️ Error en la búsqueda";
+                console.error(err);
+            }
+        }
+
+        // Asegúrate de que esta función sea accesible globalmente
+        async function generarCartaDesdeHistorico(alumno, curso, inicio, fin, docente) {
+            // 1. Validar que los datos no lleguen vacíos
+            if (!alumno || alumno === 'undefined') {
+                alert("No se pudo obtener el nombre del alumno.");
+                return;
+            }
+
+            const payload = {
+                nombre: alumno,
+                curso: curso,
+                inicio: inicio,
+                fin: fin,
+                docente: docente,
+                codigo: "CARTA-GEN-" + Date.now(),
+                fechaEmision: new Date().toLocaleDateString('es-PE')
+            };
+
+            // Usar el toast o un mensaje de carga
+            if (typeof mostrarToast === 'function') mostrarToast('Generando Carta...', 'info');
+
+            try {
+                const res = await fetch('/api/generar-pdf-individual-carta', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!res.ok) throw new Error("Error en el servidor al generar PDF");
+
+                const blob = await res.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Carta_${alumno.replace(/\s+/g, '_')}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+
+                if (typeof mostrarToast === 'function') mostrarToast('Carta descargada', 'success');
+            } catch (e) {
+                console.error(e);
+                alert("Error: " + e.message);
+            }
+        }
+
+
+
     </script>
 </body>
 

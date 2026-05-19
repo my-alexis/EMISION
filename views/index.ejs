@@ -656,7 +656,7 @@
     <!-- ═══════════════ PÁGINA: HISTORICO ═══════════════ -->
     <!-- ═══════════════ PÁGINA: HISTORICO ═══════════════ -->
     <div id="page-historico" class="page-section">
-        <div class="container py-2" style="max-width:960px">
+        <div class="container py-2" style="max-width:1800px">
 
             <div class="card shadow-sm p-4">
                 <h3 class="mb-4">
@@ -681,6 +681,10 @@
                                 <th>Inicio</th>
                                 <th>Fin</th>
                                 <th>Docente</th>
+                                <th>Tratamiento (Sr.)</th>
+                                <th>Puesto</th>
+                                <th>Empresa</th>
+                                <th>Referencia</th>
                                 <th>Acción</th>
                             </tr>
                         </thead>
@@ -1157,7 +1161,7 @@
             const input = document.getElementById('inputBusqueda');
             const search = input.value.trim();
             const estado = document.getElementById('estadoBusqueda');
-            const tabla = document.getElementById('tablaHistorico');
+            const tabla = document.getElementById('tablaHistorico'); // El tbody donde se insertan las filas
 
             if (!search) {
                 tabla.innerHTML = '';
@@ -1167,7 +1171,7 @@
 
             // Mostrar estado de carga
             estado.className = "ms-2 text-primary";
-            estado.innerText = "⏳ Buscando...";
+            estado.innerText = "⏳ Buscando y agrupando...";
 
             try {
                 const res = await fetch(`/api/historico?search=${encodeURIComponent(search)}`);
@@ -1176,37 +1180,68 @@
                 if (data.length === 0) {
                     estado.className = "ms-2 text-danger";
                     estado.innerText = "❌ Sin resultados";
-                    tabla.innerHTML = `<tr><td colspan="6" class="text-center">No se encontraron coincidencias</td></tr>`;
+                    tabla.innerHTML = `<tr><td colspan="7" class="text-center">No se encontraron coincidencias</td></tr>`;
                     return;
                 }
 
-                // Mostrar cantidad de resultados
-                estado.className = "ms-2 text-success";
-                estado.innerText = `✅ Resultados: ${data.length}`;
+                // Guardamos los datos globalmente para que 'descargarConsolidado' los encuentre
+                window.ultimosDatosHistorico = data;
 
-                tabla.innerHTML = data.map(item => `
-                <tr>
-                <td>${item.alumno}</td>
-                <td>${item.curso}</td>
-                <td>${item.inicio}</td>
-                <td>${item.fin}</td>
-                <td>${item.docente}</td>
+                // Mostrar cantidad de alumnos encontrados
+                estado.className = "ms-2 text-success";
+                estado.innerText = `✅ Alumnos encontrados: ${data.length}`;
+
+                // Renderizar la tabla con los nuevos campos
+                tabla.innerHTML = data.map((item, index) => `
+            <tr>
+                <td>
+                    <input type="text" class="form-control form-control-sm" value="${item.alumno}" id="alumno-${index}">
+                </td>
+                
+                <td>
+                    <div class="list-unstyled mb-2" style="font-size: 0.8rem; color: #555;">
+                        ${item.cursos.map((c, i) => `<div>• ${c.nombre}</div>`).join('')}
+                    </div>
+                    <div class="small">
+                        <div class="row g-1 mb-2">
+                            <div class="col-12"><label style="font-size: 0.7rem; color: #666; font-weight: bold;">Curso adicional 1</label></div>
+                            <div class="col-6"><input type="text" class="form-control form-control-sm" placeholder="Nombre" id="cursoAd1-${index}"></div>
+                            <div class="col-2"><input type="text" class="form-control form-control-sm" placeholder="Inicio" id="cursoAd1Inicio-${index}"></div>
+                            <div class="col-2"><input type="text" class="form-control form-control-sm" placeholder="Fin" id="cursoAd1Fin-${index}"></div>
+                            <div class="col-2"><input type="text" class="form-control form-control-sm" placeholder="Doc." id="cursoAd1Docente-${index}"></div>
+                        </div>
+                        <div class="row g-1">
+                            <div class="col-12"><label style="font-size: 0.7rem; color: #666; font-weight: bold;">Curso adicional 2</label></div>
+                            <div class="col-6"><input type="text" class="form-control form-control-sm" placeholder="Nombre" id="cursoAd2-${index}"></div>
+                            <div class="col-2"><input type="text" class="form-control form-control-sm" placeholder="Inicio" id="cursoAd2Inicio-${index}"></div>
+                            <div class="col-2"><input type="text" class="form-control form-control-sm" placeholder="Fin" id="cursoAd2Fin-${index}"></div>
+                            <div class="col-2"><input type="text" class="form-control form-control-sm" placeholder="Doc." id="cursoAd2Docente-${index}"></div>
+                        </div>
+                    </div>
+                </td>
 
                 <td>
-                    <button class="btn btn-sm btn-danger"
-                        onclick="generarCartaDesdeHistorico(
-                            '${item.alumno}',
-                            '${item.curso}',
-                            '${item.inicio}',
-                            '${item.fin}',
-                            '${item.docente}'
-                        )">
+                    <input type="text" class="form-control form-control-sm" value="${item.cursos[0]?.inicio || ''}" id="inicio-${index}">
+                </td>
+                <td>
+                    <input type="text" class="form-control form-control-sm" value="${item.cursos[0]?.fin || ''}" id="fin-${index}">
+                </td>
+                <td>
+                    <input type="text" class="form-control form-control-sm" value="${item.cursos[0]?.docente || ''}" id="docente-${index}">
+                </td>
 
-                        <i class="bi bi-file-earmark-pdf"></i>
-                        PDF
+
+                <td><input type="text" class="form-control form-control-sm" placeholder="Sr./Sra." id="senor-${index}"></td>
+                <td><input type="text" class="form-control form-control-sm" placeholder="Puesto" id="puesto-${index}"></td>
+                <td><input type="text" class="form-control form-control-sm" placeholder="Empresa" id="empresa-${index}"></td>
+                <td><input type="text" class="form-control form-control-sm" placeholder="Ref." id="referencia-${index}"></td>
+
+                <td class="text-center">
+                    <button class="btn btn-sm btn-danger" onclick="descargarConsolidado(${index})">
+                        <i class="bi bi-file-earmark-pdf"></i> PDF
                     </button>
                 </td>
-                </tr>
+            </tr>
         `).join('');
 
             } catch (err) {
@@ -1256,6 +1291,57 @@
                 a.remove();
 
                 if (typeof mostrarToast === 'function') mostrarToast('Carta descargada', 'success');
+            } catch (e) {
+                console.error(e);
+                alert("Error: " + e.message);
+            }
+        }
+
+        async function descargarConsolidado(index) {
+            const dataAgrupada = window.ultimosDatosHistorico[index];
+
+            // Recopilar cursos: los del Excel + los adicionales
+            let cursosFinales = [...dataAgrupada.cursos];
+            
+            const cursoAd1 = document.getElementById(`cursoAd1-${index}`)?.value.trim();
+            const cursoAd2 = document.getElementById(`cursoAd2-${index}`)?.value.trim();
+            
+            if (cursoAd1) cursosFinales.push({ nombre: cursoAd1, inicio: '', fin: '', docente: '' });
+            if (cursoAd2) cursosFinales.push({ nombre: cursoAd2, inicio: '', fin: '', docente: '' });
+
+            const payload = {
+                nombre: document.getElementById(`alumno-${index}`).value,
+                senor: document.getElementById(`senor-${index}`).value,
+                puesto: document.getElementById(`puesto-${index}`).value,
+                empresa: document.getElementById(`empresa-${index}`).value,
+                referencia: document.getElementById(`referencia-${index}`).value,
+                cursos: cursosFinales, // Todos los cursos consolidados
+                codigo: "CARTA-CONS-" + Date.now(),
+                fechaEmision: new Date().toLocaleDateString('es-PE')
+            };
+
+            if (typeof mostrarToast === 'function') mostrarToast('Generando documento...', 'info');
+
+            try {
+                const res = await fetch('/api/generar-pdf-individual-carta', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!res.ok) throw new Error("Error al generar el PDF");
+
+                const blob = await res.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Consolidado_${payload.nombre.replace(/\s+/g, '_')}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+
+                if (typeof mostrarToast === 'function') mostrarToast('Descarga exitosa', 'success');
             } catch (e) {
                 console.error(e);
                 alert("Error: " + e.message);

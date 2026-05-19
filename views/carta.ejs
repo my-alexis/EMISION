@@ -101,23 +101,44 @@
             detalle a continuación:
 
             <br><br>
-            <span class="highlight">Programa:</span>
-            <%= nombreCurso %><br>
+            
+            <% if (cursos && cursos.length > 0) { %>
+                <% cursos.forEach((curso, i) => { %>
+                    <div style="margin-bottom: 15px;">
+                        <span class="highlight"><%= i + 1 %>. Programa:</span> <%= curso.nombre %><br>
+                        <% if (curso.inicio && curso.fin) { %>
+                            <span class="highlight">Período:</span> 
+                            <%= new Date(curso.inicio).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' }) %>
+                            al
+                            <%= new Date(curso.fin).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' }) %>
+                            <br>
+                        <% } %>
+                        <% if (curso.docente) { %>
+                            <span class="highlight">Docente:</span> <%= curso.docente %><br>
+                        <% } %>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <span class="highlight">Programa:</span>
+                <%= nombreCurso %><br>
 
-                <span class="highlight">Período:</span> Realizado del
-                <%= new Date(inicio).toLocaleDateString('es-ES', { day: 'numeric' , month: 'long' , year: 'numeric' })
-                    %>
-                    al
-                    <%= new Date(fin).toLocaleDateString('es-ES', { day: 'numeric' , month: 'long' , year: 'numeric' })
+                    <span class="highlight">Período:</span> Realizado del
+                    <%= new Date(inicio).toLocaleDateString('es-ES', { day: 'numeric' , month: 'long' , year: 'numeric' })
                         %>
-                        <br>
+                        al
+                        <%= new Date(fin).toLocaleDateString('es-ES', { day: 'numeric' , month: 'long' , year: 'numeric' })
+                            %>
+                            <br>
 
-                        <span class="highlight">Docente:</span>
-                        <%= nombreDocente %>
-                            <br><br>
+                            <span class="highlight">Docente:</span>
+                            <%= nombreDocente %>
+                            <br>
+            <% } %>
+
+                            <br>
                             De acuerdo con nuestros registros académicos, el interesado cumplió con la totalidad de
                             horas lectivas, asistencias y evaluaciones establecidas, habiendo obtenido resultados
-                            satisfactorios en el programa mencionado.
+                            satisfactorios en los programas mencionados.
                             <br><br>
                             Extendemos el presente documento a solicitud del interesado para los fines que considere
                             pertinentes.
@@ -125,6 +146,10 @@
                             Sin otro particular, quedamos a su disposición para cualquier información adicional.
                             <br><br>
                             Atentamente,
+                            <%= senor %><br>
+                                <%= puesto %><br>
+                                    <%= empresa %><br>
+                                        <%= referencia %>
         </div>
         <br><br><br><br><br><br><br><br>
         <div class="campo"><span class="highlight">Dirección Académica</span></div>

@@ -154,17 +154,22 @@ function renderizarConstancia(app, datos) {
 
 // --- RENDERIZADO DE CARTA ---
 function renderizarCarta(app, datos) {
-    const fondoPath = path.join(__dirname, 'public', 'images', 'fondo_constancia.png'); // Asegúrate que el nombre coincida
+    const fondoPath = path.join(__dirname, 'public', 'images', 'fondo_constancia.png');
     const fondoBase64 = fsSync.readFileSync(fondoPath, { encoding: 'base64' });
     const fondoSrc = `data:image/png;base64,${fondoBase64}`;
 
     return new Promise((resolve, reject) => {
-        app.render('carta', { // <-- Ahora apunta a carta.ejs
+        app.render('carta', {
             nombreAlumno: datos.nombre,
             nombreCurso: datos.curso,
             inicio: datos.inicio,
             fin: datos.fin,
             nombreDocente: datos.docente,
+            senor: datos.senor || '',
+            puesto: datos.puesto || '',
+            empresa: datos.empresa || '',
+            referencia: datos.referencia || '',
+            cursos: datos.cursos || [], // Array con todos los cursos
             fondoSrc,
             fechaEmision: datos.fechaEmision || getFechaHoy()
         }, (err, html) => {
@@ -179,7 +184,7 @@ app.post('/api/generar-pdf-individual-carta', async (req, res) => {
     try {
         const html = await renderizarCarta(app, req.body);
         const pdf = await generarPDF(html, 'portrait'); // Asegura que generarPDF sea tu función con Puppeteer
-        
+
         res.contentType("application/pdf");
         res.send(pdf);
     } catch (error) {
@@ -428,37 +433,42 @@ app.patch('/api/clase/:id/short-description', async (req, res) => {
 app.get('/api/historico', async (req, res) => {
     try {
         const search = (req.query.search || '').toLowerCase().trim();
-
-        // LOG EN CONSOLA (Terminal)
-        console.log(`🔎 Buscando en histórico: "${search}"`);
-
-        if (!search) {
-            return res.json([]);
-        }
+        if (!search) return res.json([]);
 
         const workbook = XLSX.readFile('./historico.xlsx');
         const sheet = workbook.Sheets['HISTORICO'];
         const data = XLSX.utils.sheet_to_json(sheet);
 
-        const filtrados = data.filter(row => {
-            // Asegúrate de que 'DATA ALUMNO' sea el nombre exacto de la columna en tu Excel
-            const alumno = (row['DATA ALUMNO'] || '').toLowerCase();
-            return alumno.includes(search);
-        });
+        // Filtrar y Agrupar
+        const grupos = data.reduce((acc, row) => {
+            const nombreAlumno = row['DATA ALUMNO'] || 'Sin nombre';
+            if (nombreAlumno.toLowerCase().includes(search)) {
+                if (!acc[nombreAlumno]) {
+                    acc[nombreAlumno] = {
+                        alumno: nombreAlumno,
+                        cursos: []
+                    };
+                }
+                // Extraer solo la fecha sin la hora
+                const parsearFecha = (fechaStr) => {
+                    if (!fechaStr) return '';
+                    // Si viene con hora (2019-12-10 23:30:00.00), tomar solo la fecha
+                    return String(fechaStr).split(' ')[0];
+                };
 
-        const resultado = filtrados.map(row => ({
-            alumno: row['DATA ALUMNO'] || 'Sin nombre', // Usamos 'alumno' como clave
-            curso: row['Curso'] || '',
-            inicio: row['Inicio'] || '',
-            fin: row['Fin'] || '',
-            docente: row['DATA DOCENTE'] || ''
-        }));
+                acc[nombreAlumno].cursos.push({
+                    nombre: row['Curso'] || '',
+                    inicio: parsearFecha(row['Inicio']),
+                    fin: parsearFecha(row['Fin']),
+                    docente: row['DATA DOCENTE'] || ''
+                });
+            }
+            return acc;
+        }, {});
 
-        console.log(`✅ Resultados encontrados: ${resultado.length}`);
-        res.json(resultado);
+        res.json(Object.values(grupos)); // Enviamos un array de alumnos con sus listas de cursos
     } catch (error) {
-        console.error("Error al leer histórico:", error);
-        res.status(500).json({ error: "Error interno" });
+        res.status(500).json({ error: error.message });
     }
 });
 

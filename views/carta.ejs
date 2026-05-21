@@ -84,74 +84,84 @@
 
         <div class="cuerpo">
             Señores:
-            <br>
-            Presente.-
-            <br><br>
+            <%= senor %><br>
+                <%= puesto %><br>
+                    <%= empresa %><br><br>
+                        Presente.-
+                        <br><br>
 
-            <span class="highlight">Asunto:</span> Constancia de estudios cursados
-            <br>
-            De nuestra consideración:
-            <br><br>
-
-            Por medio de la presente, New Horizons Perú hace constar que el estudiante
-            <span class="highlight">
-                <%= nombreAlumno %>
-            </span>
-            ha cursado y culminado satisfactoriamente el programa de capacitación en nuestra institución, conforme se
-            detalle a continuación:
-
-            <br><br>
-            
-            <% if (cursos && cursos.length > 0) { %>
-                <% cursos.forEach((curso, i) => { %>
-                    <div style="margin-bottom: 15px;">
-                        <span class="highlight"><%= i + 1 %>. Programa:</span> <%= curso.nombre %><br>
-                        <% if (curso.inicio && curso.fin) { %>
-                            <span class="highlight">Período:</span> 
-                            <%= new Date(curso.inicio).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' }) %>
-                            al
-                            <%= new Date(curso.fin).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' }) %>
-                            <br>
-                        <% } %>
-                        <% if (curso.docente) { %>
-                            <span class="highlight">Docente:</span> <%= curso.docente %><br>
-                        <% } %>
-                    </div>
-                <% }) %>
-            <% } else { %>
-                <span class="highlight">Programa:</span>
-                <%= nombreCurso %><br>
-
-                    <span class="highlight">Período:</span> Realizado del
-                    <%= new Date(inicio).toLocaleDateString('es-ES', { day: 'numeric' , month: 'long' , year: 'numeric' })
-                        %>
-                        al
-                        <%= new Date(fin).toLocaleDateString('es-ES', { day: 'numeric' , month: 'long' , year: 'numeric' })
-                            %>
-                            <br>
-
-                            <span class="highlight">Docente:</span>
-                            <%= nombreDocente %>
-                            <br>
-            <% } %>
-
-                            <br>
-                            De acuerdo con nuestros registros académicos, el interesado cumplió con la totalidad de
-                            horas lectivas, asistencias y evaluaciones establecidas, habiendo obtenido resultados
-                            satisfactorios en los programas mencionados.
+                        <span class="highlight">Asunto:</span> Constancia de estudios cursados
+                        <br>
+                        <span class="highlight">Referencia:</span> <%= referencia %>
+                        <br><br>
+                        De nuestra consideración:
                             <br><br>
-                            Extendemos el presente documento a solicitud del interesado para los fines que considere
-                            pertinentes.
-                            <br>
-                            Sin otro particular, quedamos a su disposición para cualquier información adicional.
+                            Por medio de la presente, New Horizons Perú hace constar que el estudiante
+                            <span class="highlight">
+                                <%= nombreAlumno %>
+                            </span>
+                            ha cursado y culminado satisfactoriamente el programa de capacitación en nuestra
+                            institución, conforme se
+                            detalle a continuación:
+
                             <br><br>
-                            Atentamente,
-                            <%= senor %><br>
-                                <%= puesto %><br>
-                                    <%= empresa %><br>
-                                        <%= referencia %>
+
+                            <% if (cursos && cursos.length> 0) { %>
+                                <% cursos.forEach((curso, i)=> { %>
+                                    <div style="margin-bottom: 15px;">
+                                        <span class="highlight">
+                                            <%= i + 1 %>. Programa:
+                                        </span>
+                                        <%= curso.nombre %><br>
+                                            <% if (curso.inicio && curso.fin) { %>
+                                                <span class="highlight">Período:</span>
+                                                <%= new Date(curso.inicio).toLocaleDateString('es-ES', { day: 'numeric'
+                                                    , month: 'long' , year: 'numeric' }) %>
+                                                    al
+                                                    <%= new Date(curso.fin).toLocaleDateString('es-ES', { day: 'numeric'
+                                                        , month: 'long' , year: 'numeric' }) %>
+                                                        <br>
+                                                        <% } %>
+                                                            <% if (curso.docente) { %>
+                                                                <span class="highlight">Docente:</span>
+                                                                <%= curso.docente %><br>
+                                                                    <% } %>
+                                    </div>
+                                    <% }) %>
+                                        <% } else { %>
+                                            <span class="highlight">Programa:</span>
+                                            <%= nombreCurso %><br>
+
+                                                <span class="highlight">Período:</span> Realizado del
+                                                <%= new Date(inicio).toLocaleDateString('es-ES', { day: 'numeric' ,
+                                                    month: 'long' , year: 'numeric' }) %>
+                                                    al
+                                                    <%= new Date(fin).toLocaleDateString('es-ES', { day: 'numeric' ,
+                                                        month: 'long' , year: 'numeric' }) %>
+                                                        <br>
+
+                                                        <span class="highlight">Docente:</span>
+                                                        <%= nombreDocente %>
+                                                            <br>
+                                                            <% } %>
+
+                                                                De acuerdo con nuestros registros académicos, el
+                                                                interesado cumplió con la totalidad de
+                                                                horas lectivas, asistencias y evaluaciones establecidas,
+                                                                habiendo obtenido resultados
+                                                                satisfactorios en los programas mencionados.
+                                                                <br>
+                                                                Extendemos el presente documento a solicitud del
+                                                                interesado para los fines que considere
+                                                                pertinentes.
+                                                                <br><br>
+                                                                Sin otro particular, quedamos a su disposición para
+                                                                cualquier información adicional.
+                                                                <br><br>
+                                                                Atentamente,
+
         </div>
-        <br><br><br><br><br><br><br><br>
+        <br><br><br><br>
         <div class="campo"><span class="highlight">Dirección Académica</span></div>
         <div class="campo"><span class="highlight">New Horizons Perú</span></div>
     </div>

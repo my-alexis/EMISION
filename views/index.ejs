@@ -247,6 +247,15 @@
             font-size: 0.78rem;
             padding: 4px 10px;
         }
+
+        #tablaHistorico td {
+    vertical-align: top;
+}
+
+#tablaHistorico .form-control-sm {
+    font-size: 0.78rem;
+}
+        
     </style>
 </head>
 
@@ -1199,35 +1208,64 @@
                 </td>
                 
                 <td>
-                    <div class="list-unstyled mb-2" style="font-size: 0.8rem; color: #555;">
-                        ${item.cursos.map((c, i) => `<div>• ${c.nombre}</div>`).join('')}
+                    <div class="list-unstyled" style="font-size: 0.8rem; color: #555;">
+                        ${item.cursos.map((c, i) => `<div style="margin-bottom: 8px;">• ${c.nombre}</div>`).join('')}
                     </div>
-                    <div class="small">
-                        <div class="row g-1 mb-2">
-                            <div class="col-12"><label style="font-size: 0.7rem; color: #666; font-weight: bold;">Curso adicional 1</label></div>
-                            <div class="col-6"><input type="text" class="form-control form-control-sm" placeholder="Nombre" id="cursoAd1-${index}"></div>
-                            <div class="col-2"><input type="text" class="form-control form-control-sm" placeholder="Inicio" id="cursoAd1Inicio-${index}"></div>
-                            <div class="col-2"><input type="text" class="form-control form-control-sm" placeholder="Fin" id="cursoAd1Fin-${index}"></div>
-                            <div class="col-2"><input type="text" class="form-control form-control-sm" placeholder="Doc." id="cursoAd1Docente-${index}"></div>
-                        </div>
-                        <div class="row g-1">
-                            <div class="col-12"><label style="font-size: 0.7rem; color: #666; font-weight: bold;">Curso adicional 2</label></div>
-                            <div class="col-6"><input type="text" class="form-control form-control-sm" placeholder="Nombre" id="cursoAd2-${index}"></div>
-                            <div class="col-2"><input type="text" class="form-control form-control-sm" placeholder="Inicio" id="cursoAd2Inicio-${index}"></div>
-                            <div class="col-2"><input type="text" class="form-control form-control-sm" placeholder="Fin" id="cursoAd2Fin-${index}"></div>
-                            <div class="col-2"><input type="text" class="form-control form-control-sm" placeholder="Doc." id="cursoAd2Docente-${index}"></div>
-                        </div>
+                    <div style="margin-top: 12px;">
+                        <label style="font-size: 0.7rem; color: #666; font-weight: bold; display: block; margin-bottom: 4px;">Curso adicional 1</label>
+                        <input type="text" class="form-control form-control-sm" placeholder="Nombre" id="cursoAd1-${index}" style="margin-bottom: 8px;">
+                        
+                        <label style="font-size: 0.7rem; color: #666; font-weight: bold; display: block; margin-bottom: 4px;">Curso adicional 2</label>
+                        <input type="text" class="form-control form-control-sm" placeholder="Nombre" id="cursoAd2-${index}">
                     </div>
                 </td>
 
                 <td>
-                    <input type="text" class="form-control form-control-sm" value="${item.cursos[0]?.inicio || ''}" id="inicio-${index}">
+                    <div style="margin-bottom: 8px;">
+                        ${item.cursos.map((c, i) => `
+                            <div style="margin-bottom: 8px;">
+                                <input type="text" class="form-control form-control-sm" value="${c.inicio || ''}" id="inicio-${index}-${i}">
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div style="margin-bottom: 8px; margin-top: 20px;">
+                        <input type="text" class="form-control form-control-sm" placeholder="Inicio" id="cursoAd1Inicio-${index}">
+                    </div>
+                    <div>
+                        <input type="text" class="form-control form-control-sm" placeholder="Inicio" id="cursoAd2Inicio-${index}">
+                    </div>
                 </td>
+
                 <td>
-                    <input type="text" class="form-control form-control-sm" value="${item.cursos[0]?.fin || ''}" id="fin-${index}">
+                    <div style="margin-bottom: 8px;">
+                        ${item.cursos.map((c, i) => `
+                            <div style="margin-bottom: 8px;">
+                                <input type="text" class="form-control form-control-sm" value="${c.fin || ''}" id="fin-${index}-${i}">
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div style="margin-bottom: 8px; margin-top: 20px;">
+                        <input type="text" class="form-control form-control-sm" placeholder="Fin" id="cursoAd1Fin-${index}">
+                    </div>
+                    <div>
+                        <input type="text" class="form-control form-control-sm" placeholder="Fin" id="cursoAd2Fin-${index}">
+                    </div>
                 </td>
+
                 <td>
-                    <input type="text" class="form-control form-control-sm" value="${item.cursos[0]?.docente || ''}" id="docente-${index}">
+                    <div style="margin-bottom: 8px;">
+                        ${item.cursos.map((c, i) => `
+                            <div style="margin-bottom: 8px;">
+                                <input type="text" class="form-control form-control-sm" value="${c.docente || ''}" id="docente-${index}-${i}">
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div style="margin-bottom: 8px; margin-top: 20px;">
+                        <input type="text" class="form-control form-control-sm" placeholder="Docente" id="cursoAd1Docente-${index}">
+                    </div>
+                    <div>
+                        <input type="text" class="form-control form-control-sm" placeholder="Docente" id="cursoAd2Docente-${index}">
+                    </div>
                 </td>
 
 
@@ -1237,8 +1275,11 @@
                 <td><input type="text" class="form-control form-control-sm" placeholder="Ref." id="referencia-${index}"></td>
 
                 <td class="text-center">
-                    <button class="btn btn-sm btn-danger" onclick="descargarConsolidado(${index})">
+                    <button class="btn btn-sm btn-danger" onclick="descargarConsolidado(${index})" style="margin-right: 5px;">
                         <i class="bi bi-file-earmark-pdf"></i> PDF
+                    </button>
+                    <button class="btn btn-sm btn-primary" onclick="descargarConsolidadoWord(${index})">
+                        <i class="bi bi-file-earmark-word"></i> WORD
                     </button>
                 </td>
             </tr>
@@ -1301,13 +1342,35 @@
             const dataAgrupada = window.ultimosDatosHistorico[index];
 
             // Recopilar cursos: los del Excel + los adicionales
-            let cursosFinales = [...dataAgrupada.cursos];
-            
+            let cursosFinales = [];
+
+            // Agregar cursos del Excel con sus valores editados
+            dataAgrupada.cursos.forEach((curso, i) => {
+                const inicio = document.getElementById(`inicio-${index}-${i}`)?.value.trim() || curso.inicio || '';
+                const fin = document.getElementById(`fin-${index}-${i}`)?.value.trim() || curso.fin || '';
+                const docente = document.getElementById(`docente-${index}-${i}`)?.value.trim() || curso.docente || '';
+                
+                cursosFinales.push({
+                    nombre: curso.nombre,
+                    inicio: inicio,
+                    fin: fin,
+                    docente: docente
+                });
+            });
+
+            // Agregar cursos adicionales
             const cursoAd1 = document.getElementById(`cursoAd1-${index}`)?.value.trim();
+            const cursoAd1Inicio = document.getElementById(`cursoAd1Inicio-${index}`)?.value.trim();
+            const cursoAd1Fin = document.getElementById(`cursoAd1Fin-${index}`)?.value.trim();
+            const cursoAd1Docente = document.getElementById(`cursoAd1Docente-${index}`)?.value.trim();
+
             const cursoAd2 = document.getElementById(`cursoAd2-${index}`)?.value.trim();
-            
-            if (cursoAd1) cursosFinales.push({ nombre: cursoAd1, inicio: '', fin: '', docente: '' });
-            if (cursoAd2) cursosFinales.push({ nombre: cursoAd2, inicio: '', fin: '', docente: '' });
+            const cursoAd2Inicio = document.getElementById(`cursoAd2Inicio-${index}`)?.value.trim();
+            const cursoAd2Fin = document.getElementById(`cursoAd2Fin-${index}`)?.value.trim();
+            const cursoAd2Docente = document.getElementById(`cursoAd2Docente-${index}`)?.value.trim();
+
+            if (cursoAd1) cursosFinales.push({ nombre: cursoAd1, inicio: cursoAd1Inicio, fin: cursoAd1Fin, docente: cursoAd1Docente });
+            if (cursoAd2) cursosFinales.push({ nombre: cursoAd2, inicio: cursoAd2Inicio, fin: cursoAd2Fin, docente: cursoAd2Docente });
 
             const payload = {
                 nombre: document.getElementById(`alumno-${index}`).value,
@@ -1336,6 +1399,80 @@
                 const a = document.createElement('a');
                 a.href = url;
                 a.download = `Consolidado_${payload.nombre.replace(/\s+/g, '_')}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+
+                if (typeof mostrarToast === 'function') mostrarToast('Descarga exitosa', 'success');
+            } catch (e) {
+                console.error(e);
+                alert("Error: " + e.message);
+            }
+        }
+
+        // --- NUEVA FUNCIÓN PARA DESCARGAR COMO WORD ---
+        async function descargarConsolidadoWord(index) {
+            const dataAgrupada = window.ultimosDatosHistorico[index];
+
+            // Recopilar cursos: los del Excel + los adicionales
+            let cursosFinales = [];
+
+            // Agregar cursos del Excel con sus valores editados
+            dataAgrupada.cursos.forEach((curso, i) => {
+                const inicio = document.getElementById(`inicio-${index}-${i}`)?.value.trim() || curso.inicio || '';
+                const fin = document.getElementById(`fin-${index}-${i}`)?.value.trim() || curso.fin || '';
+                const docente = document.getElementById(`docente-${index}-${i}`)?.value.trim() || curso.docente || '';
+                
+                cursosFinales.push({
+                    nombre: curso.nombre,
+                    inicio: inicio,
+                    fin: fin,
+                    docente: docente
+                });
+            });
+
+            // Agregar cursos adicionales
+            const cursoAd1 = document.getElementById(`cursoAd1-${index}`)?.value.trim();
+            const cursoAd1Inicio = document.getElementById(`cursoAd1Inicio-${index}`)?.value.trim();
+            const cursoAd1Fin = document.getElementById(`cursoAd1Fin-${index}`)?.value.trim();
+            const cursoAd1Docente = document.getElementById(`cursoAd1Docente-${index}`)?.value.trim();
+
+            const cursoAd2 = document.getElementById(`cursoAd2-${index}`)?.value.trim();
+            const cursoAd2Inicio = document.getElementById(`cursoAd2Inicio-${index}`)?.value.trim();
+            const cursoAd2Fin = document.getElementById(`cursoAd2Fin-${index}`)?.value.trim();
+            const cursoAd2Docente = document.getElementById(`cursoAd2Docente-${index}`)?.value.trim();
+
+            if (cursoAd1) cursosFinales.push({ nombre: cursoAd1, inicio: cursoAd1Inicio, fin: cursoAd1Fin, docente: cursoAd1Docente });
+            if (cursoAd2) cursosFinales.push({ nombre: cursoAd2, inicio: cursoAd2Inicio, fin: cursoAd2Fin, docente: cursoAd2Docente });
+
+            const payload = {
+                nombre: document.getElementById(`alumno-${index}`).value,
+                senor: document.getElementById(`senor-${index}`).value,
+                puesto: document.getElementById(`puesto-${index}`).value,
+                empresa: document.getElementById(`empresa-${index}`).value,
+                referencia: document.getElementById(`referencia-${index}`).value,
+                cursos: cursosFinales, // Todos los cursos consolidados
+                codigo: "CARTA-CONS-" + Date.now(),
+                fechaEmision: new Date().toLocaleDateString('es-PE')
+            };
+
+            if (typeof mostrarToast === 'function') mostrarToast('Generando Word...', 'info');
+
+            try {
+                const res = await fetch('/api/generar-word-individual-carta', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!res.ok) throw new Error("Error al generar el Word");
+
+                const blob = await res.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Consolidado_${payload.nombre.replace(/\s+/g, '_')}.docx`;
                 document.body.appendChild(a);
                 a.click();
                 window.URL.revokeObjectURL(url);

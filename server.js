@@ -154,7 +154,7 @@ function renderizarConstancia(app, datos) {
 
 // --- RENDERIZADO DE CARTA ---
 function renderizarCarta(app, datos) {
-    const fondoPath = path.join(__dirname, 'public', 'images', 'fondo_constancia.png');
+    const fondoPath = path.join(__dirname, 'public', 'images', 'fondo_carta.png');
     const fondoBase64 = fsSync.readFileSync(fondoPath, { encoding: 'base64' });
     const fondoSrc = `data:image/png;base64,${fondoBase64}`;
 

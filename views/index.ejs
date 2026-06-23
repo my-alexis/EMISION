@@ -247,15 +247,6 @@
             font-size: 0.78rem;
             padding: 4px 10px;
         }
-
-        #tablaHistorico td {
-    vertical-align: top;
-}
-
-#tablaHistorico .form-control-sm {
-    font-size: 0.78rem;
-}
-        
     </style>
 </head>
 
@@ -280,8 +271,8 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#" onclick="showPage('historico', this)">
-                        <i class="bi bi-search"></i> Histórico
+                    <a class="nav-link" href="#" onclick="showPage('clase-manual', this)">
+                        <i class="bi bi-pencil-fill"></i>Clase Manual
                     </a>
                 </li>
             </ul>
@@ -518,6 +509,197 @@
         </div>
     </div>
 
+    <!-- ═══════════════ PÁGINA: CLASE MANUAL ═══════════════ -->
+    <div id="page-clase-manual" class="page-section">
+        <div class="container py-2" style="max-width:960px">
+
+            <div class="nh-header shadow-sm mb-4">
+                <h4><i class="bi bi-pencil-square me-2"></i>Clase Manual</h4>
+                <p class="mb-0 mt-1 opacity-75 small">Crea una clase sin necesidad de MatrixLMS e imprime certificados o constancias directamente</p>
+            </div>
+
+            <!-- ── DATOS DEL CURSO ── -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header py-3 fw-bold text-primary"><i class="bi bi-mortarboard-fill me-2"></i>Datos del Curso</div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label class="form-label fw-semibold">Nombre del curso <span class="text-danger">*</span></label>
+                            <input type="text" id="manCurso" class="form-control" placeholder="Ej: Desarrollo de Aplicaciones Móviles — Intermedio">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Prefijo de código NH <span class="text-danger">*</span></label>
+                            <input type="text" id="manPrefijo" class="form-control" placeholder="Ej: NH-2025-MOB" value="NH-MAN">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Docente <span class="text-danger">*</span></label>
+                            <input type="text" id="manDocente" class="form-control" placeholder="Ej: PÉREZ RODRÍGUEZ, JUAN CARLOS">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Fecha inicio</label>
+                            <input type="date" id="manFechaInicio" class="form-control" oninput="manActualizarFechasTexto()">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Fecha fin</label>
+                            <input type="date" id="manFechaFin" class="form-control" oninput="manActualizarFechasTexto()">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Horas académicas</label>
+                            <input type="number" id="manHorasAcad" class="form-control" placeholder="Ej: 60" min="0">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Horas cronológicas</label>
+                            <input type="number" id="manHorasCron" class="form-control" placeholder="Ej: 45" min="0">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Fecha de emisión</label>
+                            <input type="date" id="manFechaEmision" class="form-control" value="<%= new Date().toISOString().split('T')[0] %>">
+                        </div>
+                        <div class="col-12 mt-1">
+                            <small class="text-muted" id="manTextoFechas"></small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── TIPO DOCUMENTO Y HORAS ── -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header py-3 fw-bold text-primary"><i class="bi bi-file-earmark-text me-2"></i>Documento y Horas</div>
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <h6 class="fw-bold mb-3">Tipo de documento</h6>
+                            <div class="tipo-selector d-flex gap-3">
+                                <div>
+                                    <input type="radio" class="btn-check" name="manTipoDoc" id="manTipoCert" value="certificado" checked onchange="manToggleTipo()">
+                                    <label class="btn btn-outline-primary px-4" for="manTipoCert"><i class="bi bi-award-fill me-2"></i>Certificado</label>
+                                </div>
+                                <div>
+                                    <input type="radio" class="btn-check" name="manTipoDoc" id="manTipoCons" value="constancia" onchange="manToggleTipo()">
+                                    <label class="btn btn-outline-warning px-4" for="manTipoCons"><i class="bi bi-file-earmark-check-fill me-2"></i>Constancia</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="fw-bold mb-3">Tipo de horas a imprimir</h6>
+                            <div class="tipo-selector d-flex gap-3">
+                                <div>
+                                    <input type="radio" class="btn-check" name="manTipoHoras" id="manHCron" value="cronologicas" checked>
+                                    <label class="btn btn-outline-secondary px-4" for="manHCron"><i class="bi bi-journal-bookmark me-2"></i>Cronológicas</label>
+                                </div>
+                                <div>
+                                    <input type="radio" class="btn-check" name="manTipoHoras" id="manHAcad" value="academicas">
+                                    <label class="btn btn-outline-secondary px-4" for="manHAcad"><i class="bi bi-hourglass-split me-2"></i>Académicas</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="manCheckQR">
+                                <label class="form-check-label fw-semibold" for="manCheckQR">Incluir código QR global</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── FIRMA DEL INSTRUCTOR ── -->
+            <div class="firma-container shadow-sm mb-4" id="manSeccionFirma">
+                <div class="row align-items-center">
+                    <div class="col-md-7">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h5 class="fw-bold mb-0"><i class="bi bi-pencil-square me-2"></i>Firma del Instructor</h5>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="manSwitchFirma" checked onchange="manToggleFirmaVis()">
+                                <label class="form-check-label small fw-bold" for="manSwitchFirma">Incluir en certificado</label>
+                            </div>
+                        </div>
+                        <p class="text-muted small">PNG de la firma del instructor. Si lo desactivas, desaparece todo el bloque del instructor en el PDF.</p>
+                        <input type="file" id="manInputFirma" class="form-control" accept="image/png" onchange="manPrevisualizarFirma(this)">
+                    </div>
+                    <div class="col-md-5 text-center">
+                        <div class="preview-box" id="manPreviewBoxFirma">
+                            <span id="manPreviewText" class="text-muted small">Sin firma seleccionada</span>
+                            <img id="manImgPreview" src="" alt="Vista previa" style="max-height:70px; display:none;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── ALUMNOS ── -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header py-3 fw-bold text-primary d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-people-fill me-2"></i>Alumnos</span>
+                    <span class="badge bg-primary rounded-pill" id="manContadorAlumnos">0 alumnos</span>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Agregar uno a uno -->
+                    <div class="row g-2 mb-3 align-items-end">
+                        <div class="col-md-9">
+                            <label class="form-label fw-semibold">Apellidos y Nombres (en mayúsculas)</label>
+                            <input type="text" id="manNuevoAlumno" class="form-control"
+                                placeholder="Ej: GARCÍA FLORES, ANA MARÍA"
+                                onkeydown="if(event.key==='Enter'){manAgregarAlumno();}">
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-primary w-100" onclick="manAgregarAlumno()">
+                                <i class="bi bi-person-plus-fill me-1"></i>Agregar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Pegado masivo -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            <i class="bi bi-clipboard-plus me-1"></i>Pegar lista (un nombre por línea)
+                        </label>
+                        <div class="input-group">
+                            <textarea id="manListaMasiva" class="form-control" rows="4"
+                                placeholder="APELLIDO1 APELLIDO2, NOMBRE1 NOMBRE2&#10;PÉREZ RÍOS, CARLOS DANIEL&#10;TORRES LIMA, SANDRA"></textarea>
+                            <button class="btn btn-outline-secondary" onclick="manImportarLista()" title="Importar lista">
+                                <i class="bi bi-arrow-bar-right"></i>
+                            </button>
+                        </div>
+                        <small class="text-muted">Se convierten automáticamente a mayúsculas y se ordenan alfabéticamente.</small>
+                    </div>
+
+                    <!-- Tabla de alumnos agregados -->
+                    <div id="manTablaWrapper" class="d-none">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th width="50" class="text-center">
+                                        <input type="checkbox" id="manSelectAll" class="form-check-input" onclick="manToggleAll(this)">
+                                    </th>
+                                    <th>CÓDIGO NH</th>
+                                    <th>APELLIDOS Y NOMBRES</th>
+                                    <th class="text-center" width="80">ESTADO</th>
+                                    <th class="text-center" width="100">ACCIÓN</th>
+                                </tr>
+                            </thead>
+                            <tbody id="manTbodyAlumnos"></tbody>
+                        </table>
+                    </div>
+                    <div id="manEmptyMsg" class="text-center text-muted py-4">
+                        <i class="bi bi-person-x" style="font-size:2rem;"></i>
+                        <p class="mt-2">Aún no hay alumnos. Agrégalos uno a uno o pega la lista.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="d-flex gap-3 justify-content-end mb-5 flex-wrap">
+                <button class="btn btn-outline-danger" onclick="manLimpiarTodo()">
+                    <i class="bi bi-trash me-1"></i>Limpiar todo
+                </button>
+                <button class="btn btn-success btn-lg px-5" onclick="manCertificarSeleccionados()">
+                    <i class="bi bi-file-earmark-pdf-fill me-2"></i>Generar Seleccionados
+                </button>
+            </div>
+
+        </div>
+    </div>
+
     <!-- ═══════════════ PÁGINA: CONFIGURACIÓN CLASE ═══════════════ -->
     <div id="page-config-clase" class="page-section">
         <div class="container py-2" style="max-width:960px">
@@ -661,51 +843,6 @@
             </div>
         </div>
     </div>
-
-    <!-- ═══════════════ PÁGINA: HISTORICO ═══════════════ -->
-    <!-- ═══════════════ PÁGINA: HISTORICO ═══════════════ -->
-    <div id="page-historico" class="page-section">
-        <div class="container py-2" style="max-width:1800px">
-
-            <div class="card shadow-sm p-4">
-                <h3 class="mb-4">
-                    <i class="bi bi-search"></i> Buscador Histórico (Excel)
-                </h3>
-                <span id="estadoBusqueda" class="ms-2 fw-bold"></span>
-                <div class="input-group mb-3">
-                    <input type="text" id="inputBusqueda" class="form-control"
-                        placeholder="Ingrese nombre o apellido para buscar...">
-
-                    <button class="btn btn-primary" onclick="buscarEnExcel()">
-                        <i class="bi bi-search"></i> Buscar
-                    </button>
-                </div>
-
-                <div class="table-responsive">
-                    <table class="table table-hover mt-3">
-                        <thead class="table-dark">
-                            <tr>
-                                <th>Alumno</th>
-                                <th>Curso</th>
-                                <th>Inicio</th>
-                                <th>Fin</th>
-                                <th>Docente</th>
-                                <th>Tratamiento (Sr.)</th>
-                                <th>Puesto</th>
-                                <th>Empresa</th>
-                                <th>Referencia</th>
-                                <th>Acción</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tablaHistorico"></tbody>
-                    </table>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-
 
     <!-- Toast -->
     <div class="position-fixed top-0 end-0 p-3" style="z-index:2000">
@@ -1166,327 +1303,279 @@
                 fecha.getDate().toString().padStart(2, '0');
             return FERIADOS_PERU.includes(diaMes);
         }
-        async function buscarEnExcel() {
-            const input = document.getElementById('inputBusqueda');
-            const search = input.value.trim();
-            const estado = document.getElementById('estadoBusqueda');
-            const tabla = document.getElementById('tablaHistorico'); // El tbody donde se insertan las filas
 
-            if (!search) {
-                tabla.innerHTML = '';
-                estado.innerText = '';
+        // ══════════════════════════════════════════════════════
+        //  CLASE MANUAL — lógica completa
+        // ══════════════════════════════════════════════════════
+
+        let manAlumnos = [];   // [{nombre, codigo, estado}]
+
+        const MESES_LARGO = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
+        function manFechaISO_a_Texto(isoStr) {
+            if (!isoStr) return '---';
+            const [y, m, d] = isoStr.split('-').map(Number);
+            return `${d} de ${MESES_LARGO[m-1]} de ${y}`;
+        }
+
+        function manActualizarFechasTexto() {
+            const ini = document.getElementById('manFechaInicio').value;
+            const fin = document.getElementById('manFechaFin').value;
+            document.getElementById('manTextoFechas').textContent =
+                ini || fin ? `Período: ${manFechaISO_a_Texto(ini)} — ${manFechaISO_a_Texto(fin)}` : '';
+        }
+
+        function manToggleTipo() {
+            const esCons = document.querySelector('input[name="manTipoDoc"]:checked').value === 'constancia';
+            document.getElementById('manSeccionFirma').style.opacity = esCons ? '0.4' : '1';
+            document.getElementById('manSeccionFirma').style.pointerEvents = esCons ? 'none' : '';
+        }
+
+        function manToggleFirmaVis() {
+            const inc = document.getElementById('manSwitchFirma').checked;
+            document.getElementById('manPreviewBoxFirma').style.opacity = inc ? '1' : '0.3';
+        }
+
+        function manPrevisualizarFirma(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                const img = document.getElementById('manImgPreview');
+                img.src = e.target.result;
+                img.style.display = 'block';
+                document.getElementById('manPreviewText').style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function manCodigoAlumno(idx) {
+            const prefijo = (document.getElementById('manPrefijo').value || 'NH-MAN').trim();
+            return `${prefijo}-${(idx + 1).toString().padStart(3, '0')}`;
+        }
+
+        function manRenumerarCodigos() {
+            manAlumnos.forEach((a, i) => { a.codigo = manCodigoAlumno(i); });
+        }
+
+        function manRenderTabla() {
+            const tbody = document.getElementById('manTbodyAlumnos');
+            const wrapper = document.getElementById('manTablaWrapper');
+            const empty = document.getElementById('manEmptyMsg');
+
+            if (manAlumnos.length === 0) {
+                wrapper.classList.add('d-none');
+                empty.style.display = '';
+                document.getElementById('manContadorAlumnos').textContent = '0 alumnos';
                 return;
             }
 
-            // Mostrar estado de carga
-            estado.className = "ms-2 text-primary";
-            estado.innerText = "⏳ Buscando y agrupando...";
+            wrapper.classList.remove('d-none');
+            empty.style.display = 'none';
+            document.getElementById('manContadorAlumnos').textContent = `${manAlumnos.length} alumno${manAlumnos.length !== 1 ? 's' : ''}`;
 
-            try {
-                const res = await fetch(`/api/historico?search=${encodeURIComponent(search)}`);
-                const data = await res.json();
+            tbody.innerHTML = manAlumnos.map((a, i) => {
+                const badgeClass = a.estado === 'ok' ? 'badge-ok' : a.estado === 'error' ? 'badge-error' : 'badge-pendiente';
+                const badgeText = a.estado === 'ok' ? 'Generado' : a.estado === 'error' ? 'Error' : 'Pendiente';
+                return `<tr id="manRow_${i}">
+                    <td class="text-center">
+                        <input type="checkbox" class="man-alumno-check form-check-input" data-idx="${i}">
+                    </td>
+                    <td><code class="fw-bold text-primary">${a.codigo}</code></td>
+                    <td class="fw-semibold">${a.nombre}</td>
+                    <td class="text-center"><span class="badge rounded-pill ${badgeClass}">${badgeText}</span></td>
+                    <td class="text-center d-flex gap-1 justify-content-center">
+                        <button class="btn btn-sm btn-outline-primary" title="Descargar individual" onclick="manDescargarUno(${i})">
+                            <i class="bi bi-download"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" title="Eliminar" onclick="manEliminarAlumno(${i})">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
 
-                if (data.length === 0) {
-                    estado.className = "ms-2 text-danger";
-                    estado.innerText = "❌ Sin resultados";
-                    tabla.innerHTML = `<tr><td colspan="7" class="text-center">No se encontraron coincidencias</td></tr>`;
-                    return;
+        function manAgregarAlumno() {
+            const input = document.getElementById('manNuevoAlumno');
+            const nombre = input.value.trim().toUpperCase();
+            if (!nombre) { mostrarToast('Escribe el nombre del alumno', 'warning'); return; }
+            if (manAlumnos.some(a => a.nombre === nombre)) { mostrarToast('Ese alumno ya está en la lista', 'warning'); return; }
+            manAlumnos.push({ nombre, codigo: '', estado: 'pendiente' });
+            manAlumnos.sort((a, b) => a.nombre.localeCompare(b.nombre));
+            manRenumerarCodigos();
+            manRenderTabla();
+            input.value = '';
+            input.focus();
+        }
+
+        function manEliminarAlumno(idx) {
+            manAlumnos.splice(idx, 1);
+            manRenumerarCodigos();
+            manRenderTabla();
+        }
+
+        function manImportarLista() {
+            const ta = document.getElementById('manListaMasiva');
+            const lineas = ta.value.split('\n').map(l => l.trim().toUpperCase()).filter(l => l.length > 0);
+            if (lineas.length === 0) { mostrarToast('La lista está vacía', 'warning'); return; }
+            let agregados = 0;
+            lineas.forEach(nombre => {
+                if (!manAlumnos.some(a => a.nombre === nombre)) {
+                    manAlumnos.push({ nombre, codigo: '', estado: 'pendiente' });
+                    agregados++;
                 }
-
-                // Guardamos los datos globalmente para que 'descargarConsolidado' los encuentre
-                window.ultimosDatosHistorico = data;
-
-                // Mostrar cantidad de alumnos encontrados
-                estado.className = "ms-2 text-success";
-                estado.innerText = `✅ Alumnos encontrados: ${data.length}`;
-
-                // Renderizar la tabla con los nuevos campos
-                tabla.innerHTML = data.map((item, index) => `
-            <tr>
-                <td>
-                    <input type="text" class="form-control form-control-sm" value="${item.alumno}" id="alumno-${index}">
-                </td>
-                
-                <td>
-                    <div class="list-unstyled" style="font-size: 0.8rem; color: #555;">
-                        ${item.cursos.map((c, i) => `<div style="margin-bottom: 8px;">• ${c.nombre}</div>`).join('')}
-                    </div>
-                    <div style="margin-top: 12px;">
-                        <label style="font-size: 0.7rem; color: #666; font-weight: bold; display: block; margin-bottom: 4px;">Curso adicional 1</label>
-                        <input type="text" class="form-control form-control-sm" placeholder="Nombre" id="cursoAd1-${index}" style="margin-bottom: 8px;">
-                        
-                        <label style="font-size: 0.7rem; color: #666; font-weight: bold; display: block; margin-bottom: 4px;">Curso adicional 2</label>
-                        <input type="text" class="form-control form-control-sm" placeholder="Nombre" id="cursoAd2-${index}">
-                    </div>
-                </td>
-
-                <td>
-                    <div style="margin-bottom: 8px;">
-                        ${item.cursos.map((c, i) => `
-                            <div style="margin-bottom: 8px;">
-                                <input type="text" class="form-control form-control-sm" value="${c.inicio || ''}" id="inicio-${index}-${i}">
-                            </div>
-                        `).join('')}
-                    </div>
-                    <div style="margin-bottom: 8px; margin-top: 20px;">
-                        <input type="text" class="form-control form-control-sm" placeholder="Inicio" id="cursoAd1Inicio-${index}">
-                    </div>
-                    <div>
-                        <input type="text" class="form-control form-control-sm" placeholder="Inicio" id="cursoAd2Inicio-${index}">
-                    </div>
-                </td>
-
-                <td>
-                    <div style="margin-bottom: 8px;">
-                        ${item.cursos.map((c, i) => `
-                            <div style="margin-bottom: 8px;">
-                                <input type="text" class="form-control form-control-sm" value="${c.fin || ''}" id="fin-${index}-${i}">
-                            </div>
-                        `).join('')}
-                    </div>
-                    <div style="margin-bottom: 8px; margin-top: 20px;">
-                        <input type="text" class="form-control form-control-sm" placeholder="Fin" id="cursoAd1Fin-${index}">
-                    </div>
-                    <div>
-                        <input type="text" class="form-control form-control-sm" placeholder="Fin" id="cursoAd2Fin-${index}">
-                    </div>
-                </td>
-
-                <td>
-                    <div style="margin-bottom: 8px;">
-                        ${item.cursos.map((c, i) => `
-                            <div style="margin-bottom: 8px;">
-                                <input type="text" class="form-control form-control-sm" value="${c.docente || ''}" id="docente-${index}-${i}">
-                            </div>
-                        `).join('')}
-                    </div>
-                    <div style="margin-bottom: 8px; margin-top: 20px;">
-                        <input type="text" class="form-control form-control-sm" placeholder="Docente" id="cursoAd1Docente-${index}">
-                    </div>
-                    <div>
-                        <input type="text" class="form-control form-control-sm" placeholder="Docente" id="cursoAd2Docente-${index}">
-                    </div>
-                </td>
-
-
-                <td><input type="text" class="form-control form-control-sm" placeholder="Sr./Sra." id="senor-${index}"></td>
-                <td><input type="text" class="form-control form-control-sm" placeholder="Puesto" id="puesto-${index}"></td>
-                <td><input type="text" class="form-control form-control-sm" placeholder="Empresa" id="empresa-${index}"></td>
-                <td><input type="text" class="form-control form-control-sm" placeholder="Ref." id="referencia-${index}"></td>
-
-                <td class="text-center">
-                    <button class="btn btn-sm btn-danger" onclick="descargarConsolidado(${index})" style="margin-right: 5px;">
-                        <i class="bi bi-file-earmark-pdf"></i> PDF
-                    </button>
-                    <button class="btn btn-sm btn-primary" onclick="descargarConsolidadoWord(${index})">
-                        <i class="bi bi-file-earmark-word"></i> WORD
-                    </button>
-                </td>
-            </tr>
-        `).join('');
-
-            } catch (err) {
-                estado.innerText = "⚠️ Error en la búsqueda";
-                console.error(err);
-            }
-        }
-
-        // Asegúrate de que esta función sea accesible globalmente
-        async function generarCartaDesdeHistorico(alumno, curso, inicio, fin, docente) {
-            // 1. Validar que los datos no lleguen vacíos
-            if (!alumno || alumno === 'undefined') {
-                alert("No se pudo obtener el nombre del alumno.");
-                return;
-            }
-
-            const payload = {
-                nombre: alumno,
-                curso: curso,
-                inicio: inicio,
-                fin: fin,
-                docente: docente,
-                codigo: "CARTA-GEN-" + Date.now(),
-                fechaEmision: new Date().toLocaleDateString('es-PE')
-            };
-
-            // Usar el toast o un mensaje de carga
-            if (typeof mostrarToast === 'function') mostrarToast('Generando Carta...', 'info');
-
-            try {
-                const res = await fetch('/api/generar-pdf-individual-carta', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!res.ok) throw new Error("Error en el servidor al generar PDF");
-
-                const blob = await res.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `Carta_${alumno.replace(/\s+/g, '_')}.pdf`;
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                a.remove();
-
-                if (typeof mostrarToast === 'function') mostrarToast('Carta descargada', 'success');
-            } catch (e) {
-                console.error(e);
-                alert("Error: " + e.message);
-            }
-        }
-
-        async function descargarConsolidado(index) {
-            const dataAgrupada = window.ultimosDatosHistorico[index];
-
-            // Recopilar cursos: los del Excel + los adicionales
-            let cursosFinales = [];
-
-            // Agregar cursos del Excel con sus valores editados
-            dataAgrupada.cursos.forEach((curso, i) => {
-                const inicio = document.getElementById(`inicio-${index}-${i}`)?.value.trim() || curso.inicio || '';
-                const fin = document.getElementById(`fin-${index}-${i}`)?.value.trim() || curso.fin || '';
-                const docente = document.getElementById(`docente-${index}-${i}`)?.value.trim() || curso.docente || '';
-                
-                cursosFinales.push({
-                    nombre: curso.nombre,
-                    inicio: inicio,
-                    fin: fin,
-                    docente: docente
-                });
             });
-
-            // Agregar cursos adicionales
-            const cursoAd1 = document.getElementById(`cursoAd1-${index}`)?.value.trim();
-            const cursoAd1Inicio = document.getElementById(`cursoAd1Inicio-${index}`)?.value.trim();
-            const cursoAd1Fin = document.getElementById(`cursoAd1Fin-${index}`)?.value.trim();
-            const cursoAd1Docente = document.getElementById(`cursoAd1Docente-${index}`)?.value.trim();
-
-            const cursoAd2 = document.getElementById(`cursoAd2-${index}`)?.value.trim();
-            const cursoAd2Inicio = document.getElementById(`cursoAd2Inicio-${index}`)?.value.trim();
-            const cursoAd2Fin = document.getElementById(`cursoAd2Fin-${index}`)?.value.trim();
-            const cursoAd2Docente = document.getElementById(`cursoAd2Docente-${index}`)?.value.trim();
-
-            if (cursoAd1) cursosFinales.push({ nombre: cursoAd1, inicio: cursoAd1Inicio, fin: cursoAd1Fin, docente: cursoAd1Docente });
-            if (cursoAd2) cursosFinales.push({ nombre: cursoAd2, inicio: cursoAd2Inicio, fin: cursoAd2Fin, docente: cursoAd2Docente });
-
-            const payload = {
-                nombre: document.getElementById(`alumno-${index}`).value,
-                senor: document.getElementById(`senor-${index}`).value,
-                puesto: document.getElementById(`puesto-${index}`).value,
-                empresa: document.getElementById(`empresa-${index}`).value,
-                referencia: document.getElementById(`referencia-${index}`).value,
-                cursos: cursosFinales, // Todos los cursos consolidados
-                codigo: "CARTA-CONS-" + Date.now(),
-                fechaEmision: new Date().toLocaleDateString('es-PE')
-            };
-
-            if (typeof mostrarToast === 'function') mostrarToast('Generando documento...', 'info');
-
-            try {
-                const res = await fetch('/api/generar-pdf-individual-carta', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!res.ok) throw new Error("Error al generar el PDF");
-
-                const blob = await res.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `Consolidado_${payload.nombre.replace(/\s+/g, '_')}.pdf`;
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                a.remove();
-
-                if (typeof mostrarToast === 'function') mostrarToast('Descarga exitosa', 'success');
-            } catch (e) {
-                console.error(e);
-                alert("Error: " + e.message);
-            }
+            manAlumnos.sort((a, b) => a.nombre.localeCompare(b.nombre));
+            manRenumerarCodigos();
+            manRenderTabla();
+            ta.value = '';
+            mostrarToast(`${agregados} alumno(s) importado(s) correctamente`, 'success');
         }
 
-        // --- NUEVA FUNCIÓN PARA DESCARGAR COMO WORD ---
-        async function descargarConsolidadoWord(index) {
-            const dataAgrupada = window.ultimosDatosHistorico[index];
+        function manToggleAll(cb) {
+            document.querySelectorAll('.man-alumno-check').forEach(c => c.checked = cb.checked);
+        }
 
-            // Recopilar cursos: los del Excel + los adicionales
-            let cursosFinales = [];
+        function manLimpiarTodo() {
+            if (!confirm('¿Seguro que quieres limpiar la lista de alumnos?')) return;
+            manAlumnos = [];
+            manRenderTabla();
+        }
 
-            // Agregar cursos del Excel con sus valores editados
-            dataAgrupada.cursos.forEach((curso, i) => {
-                const inicio = document.getElementById(`inicio-${index}-${i}`)?.value.trim() || curso.inicio || '';
-                const fin = document.getElementById(`fin-${index}-${i}`)?.value.trim() || curso.fin || '';
-                const docente = document.getElementById(`docente-${index}-${i}`)?.value.trim() || curso.docente || '';
-                
-                cursosFinales.push({
-                    nombre: curso.nombre,
-                    inicio: inicio,
-                    fin: fin,
-                    docente: docente
-                });
+        function manGetDatosBase() {
+            const curso = document.getElementById('manCurso').value.trim();
+            const docente = document.getElementById('manDocente').value.trim().toUpperCase();
+            const tipoHoras = document.querySelector('input[name="manTipoHoras"]:checked').value;
+            const horasAcad = document.getElementById('manHorasAcad').value || '0';
+            const horasCron = document.getElementById('manHorasCron').value || '0';
+            const creditos = tipoHoras === 'academicas' ? horasAcad : horasCron;
+            const tipo = document.querySelector('input[name="manTipoDoc"]:checked').value;
+            const incluirQR = document.getElementById('manCheckQR').checked;
+            const fechaEmision = manFechaISO_a_Texto(document.getElementById('manFechaEmision').value);
+            const inicio = manFechaISO_a_Texto(document.getElementById('manFechaInicio').value);
+            const fin = manFechaISO_a_Texto(document.getElementById('manFechaFin').value);
+
+            if (!curso) { mostrarToast('Escribe el nombre del curso', 'warning'); return null; }
+            if (!docente) { mostrarToast('Escribe el nombre del docente', 'warning'); return null; }
+
+            return { curso, docente, creditos, tipoHoras, inicio, fin, tipo, incluirQR, fechaEmision };
+        }
+
+        async function manGetFirmaBase64() {
+            const incluirFirma = document.getElementById('manSwitchFirma').checked;
+            const tipo = document.querySelector('input[name="manTipoDoc"]:checked').value;
+            if (!incluirFirma || tipo === 'constancia') return '';
+            const file = document.getElementById('manInputFirma').files[0];
+            if (!file) return '';
+            return new Promise(resolve => {
+                const r = new FileReader();
+                r.onload = e => resolve(e.target.result);
+                r.readAsDataURL(file);
             });
-
-            // Agregar cursos adicionales
-            const cursoAd1 = document.getElementById(`cursoAd1-${index}`)?.value.trim();
-            const cursoAd1Inicio = document.getElementById(`cursoAd1Inicio-${index}`)?.value.trim();
-            const cursoAd1Fin = document.getElementById(`cursoAd1Fin-${index}`)?.value.trim();
-            const cursoAd1Docente = document.getElementById(`cursoAd1Docente-${index}`)?.value.trim();
-
-            const cursoAd2 = document.getElementById(`cursoAd2-${index}`)?.value.trim();
-            const cursoAd2Inicio = document.getElementById(`cursoAd2Inicio-${index}`)?.value.trim();
-            const cursoAd2Fin = document.getElementById(`cursoAd2Fin-${index}`)?.value.trim();
-            const cursoAd2Docente = document.getElementById(`cursoAd2Docente-${index}`)?.value.trim();
-
-            if (cursoAd1) cursosFinales.push({ nombre: cursoAd1, inicio: cursoAd1Inicio, fin: cursoAd1Fin, docente: cursoAd1Docente });
-            if (cursoAd2) cursosFinales.push({ nombre: cursoAd2, inicio: cursoAd2Inicio, fin: cursoAd2Fin, docente: cursoAd2Docente });
-
-            const payload = {
-                nombre: document.getElementById(`alumno-${index}`).value,
-                senor: document.getElementById(`senor-${index}`).value,
-                puesto: document.getElementById(`puesto-${index}`).value,
-                empresa: document.getElementById(`empresa-${index}`).value,
-                referencia: document.getElementById(`referencia-${index}`).value,
-                cursos: cursosFinales, // Todos los cursos consolidados
-                codigo: "CARTA-CONS-" + Date.now(),
-                fechaEmision: new Date().toLocaleDateString('es-PE')
-            };
-
-            if (typeof mostrarToast === 'function') mostrarToast('Generando Word...', 'info');
-
-            try {
-                const res = await fetch('/api/generar-word-individual-carta', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!res.ok) throw new Error("Error al generar el Word");
-
-                const blob = await res.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `Consolidado_${payload.nombre.replace(/\s+/g, '_')}.docx`;
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                a.remove();
-
-                if (typeof mostrarToast === 'function') mostrarToast('Descarga exitosa', 'success');
-            } catch (e) {
-                console.error(e);
-                alert("Error: " + e.message);
-            }
         }
 
+        async function manDescargarUno(idx) {
+            const base = manGetDatosBase();
+            if (!base) return;
+            const alumno = manAlumnos[idx];
+            const firmaManual = await manGetFirmaBase64();
+            const endpoint = base.tipo === 'constancia'
+                ? '/api/generar-pdf-individual-constancia'
+                : '/api/generar-pdf-individual';
 
+            manAlumnos[idx].estado = 'procesando';
+            manRenderTabla();
 
+            try {
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        nombre: alumno.nombre,
+                        codigo: alumno.codigo,
+                        curso: base.curso,
+                        docente: base.docente,
+                        inicio: base.inicio,
+                        fin: base.fin,
+                        creditos: base.creditos,
+                        tipoHoras: base.tipoHoras,
+                        firmaManual,
+                        incluirQR: base.incluirQR,
+                        fechaEmision: base.fechaEmision
+                    })
+                });
+                if (!res.ok) throw new Error(await res.text());
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                const prefijo = base.tipo === 'constancia' ? 'Constancia' : 'Certificado';
+                a.download = `${prefijo}_${alumno.nombre.replace(/\s+/g, '_')}_${alumno.codigo}.pdf`;
+                a.click();
+                URL.revokeObjectURL(url);
+                manAlumnos[idx].estado = 'ok';
+            } catch (e) {
+                manAlumnos[idx].estado = 'error';
+                mostrarToast('Error al generar: ' + e.message, 'danger');
+            }
+            manRenderTabla();
+        }
+
+        async function manCertificarSeleccionados() {
+            const base = manGetDatosBase();
+            if (!base) return;
+            const checks = Array.from(document.querySelectorAll('.man-alumno-check:checked'));
+            if (checks.length === 0) { mostrarToast('Selecciona al menos un alumno', 'warning'); return; }
+            const firmaManual = await manGetFirmaBase64();
+            const seleccionados = checks.map(c => manAlumnos[parseInt(c.dataset.idx)]);
+
+            mostrarToast(`Generando ${seleccionados.length} documento(s)...`, 'info');
+
+            for (const alumno of seleccionados) {
+                const idx = manAlumnos.indexOf(alumno);
+                const endpoint = base.tipo === 'constancia'
+                    ? '/api/generar-pdf-individual-constancia'
+                    : '/api/generar-pdf-individual';
+                manAlumnos[idx].estado = 'procesando';
+                manRenderTabla();
+                try {
+                    const res = await fetch(endpoint, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            nombre: alumno.nombre,
+                            codigo: alumno.codigo,
+                            curso: base.curso,
+                            docente: base.docente,
+                            inicio: base.inicio,
+                            fin: base.fin,
+                            creditos: base.creditos,
+                            tipoHoras: base.tipoHoras,
+                            firmaManual,
+                            incluirQR: base.incluirQR,
+                            fechaEmision: base.fechaEmision
+                        })
+                    });
+                    if (!res.ok) throw new Error(await res.text());
+                    const blob = await res.blob();
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    const prefijo = base.tipo === 'constancia' ? 'Constancia' : 'Certificado';
+                    a.download = `${prefijo}_${alumno.nombre.replace(/\s+/g, '_')}_${alumno.codigo}.pdf`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    manAlumnos[idx].estado = 'ok';
+                } catch (e) {
+                    manAlumnos[idx].estado = 'error';
+                    mostrarToast(`Error con ${alumno.nombre}: ` + e.message, 'danger');
+                }
+                manRenderTabla();
+                await new Promise(r => setTimeout(r, 400)); // pausa entre PDFs para no saturar el browser
+            }
+            mostrarToast('¡Proceso completado!', 'success');
+        }
     </script>
 </body>
 

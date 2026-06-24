@@ -4,13 +4,10 @@ const express = require('express');
 const multer = require('multer');
 const axios = require('axios');
 const path = require('path');
-const XLSX = require('xlsx');
 const puppeteer = require('puppeteer');
 const fs = require('fs').promises;
 const fsSync = require('fs');
 const { PDFDocument } = require('pdf-lib');
-
-const EXCEL_PATH = path.join(__dirname, 'historico.xlsx');
 
 const app = express();
 app.use(express.static('public'));
@@ -151,49 +148,6 @@ function renderizarConstancia(app, datos) {
     });
 }
 
-
-// --- RENDERIZADO DE CARTA ---
-function renderizarCarta(app, datos) {
-    const fondoPath = path.join(__dirname, 'public', 'images', 'fondo_carta.png');
-    const fondoBase64 = fsSync.readFileSync(fondoPath, { encoding: 'base64' });
-    const fondoSrc = `data:image/png;base64,${fondoBase64}`;
-
-    return new Promise((resolve, reject) => {
-        app.render('carta', {
-            nombreAlumno: datos.nombre,
-            nombreCurso: datos.curso,
-            inicio: datos.inicio,
-            fin: datos.fin,
-            nombreDocente: datos.docente,
-            senor: datos.senor || '',
-            puesto: datos.puesto || '',
-            empresa: datos.empresa || '',
-            referencia: datos.referencia || '',
-            cursos: datos.cursos || [], // Array con todos los cursos
-            fondoSrc,
-            fechaEmision: datos.fechaEmision || getFechaHoy()
-        }, (err, html) => {
-            if (err) return reject(err);
-            resolve(html);
-        });
-    });
-}
-
-// --- RUTA API CARTA ---
-app.post('/api/generar-pdf-individual-carta', async (req, res) => {
-    try {
-        const html = await renderizarCarta(app, req.body);
-        const pdf = await generarPDF(html, 'portrait'); // Asegura que generarPDF sea tu función con Puppeteer
-
-        res.contentType("application/pdf");
-        res.send(pdf);
-    } catch (error) {
-        console.error(error);
-        res.status(500).send("Error interno");
-    }
-});
-
-
 // --- GENERACIÓN DE PDF CON PUPPETEER ---
 async function generarPDF(html, orientacion = 'landscape') {
     const browser = await puppeteer.launch({
@@ -211,6 +165,31 @@ async function generarPDF(html, orientacion = 'landscape') {
         return pdf;
     } finally {
         await browser.close();
+    }
+}
+
+// --- MERGE CERTIFICADO + TEMARIO ---
+async function mergeConTemario(certificadoPdfBytes, temarioBase64) {
+    if (!temarioBase64) return certificadoPdfBytes;
+    try {
+        // temarioBase64 puede venir con o sin el prefijo data:application/pdf;base64,
+        const base64Data = temarioBase64.includes(',') ? temarioBase64.split(',')[1] : temarioBase64;
+        const temarioBytes = Buffer.from(base64Data, 'base64');
+
+        const docFinal = await PDFDocument.create();
+
+        const docCert = await PDFDocument.load(certificadoPdfBytes);
+        const pagsCert = await docFinal.copyPages(docCert, docCert.getPageIndices());
+        pagsCert.forEach(p => docFinal.addPage(p));
+
+        const docTemario = await PDFDocument.load(temarioBytes);
+        const pagsTemario = await docFinal.copyPages(docTemario, docTemario.getPageIndices());
+        pagsTemario.forEach(p => docFinal.addPage(p));
+
+        return Buffer.from(await docFinal.save());
+    } catch (e) {
+        console.error('Error al mergear temario:', e.message);
+        return certificadoPdfBytes; // si falla, devuelve solo el certificado
     }
 }
 
@@ -283,7 +262,7 @@ app.post('/buscar', async (req, res) => {
             fechaInicio: formatearFecha(c.start_at),
             fechaFin: formatearFecha(c.finish_at),
             horasAcademicas: c.section_code || "0",
-            horasCronologicas: c.credits || "0",
+            horasCronologicas: c.credits  || "0",
             cursoId,
             total: alumnosFinal.length
         });
@@ -295,9 +274,10 @@ app.post('/buscar', async (req, res) => {
 
 app.post('/api/generar-pdf-individual', async (req, res) => {
     try {
-        const datos = req.body;  // fechaEmision ya viene aquí desde el frontend
-        const html = await renderizarCertificado(app, datos);  // sin req
-        const pdf = await generarPDF(html, 'landscape');
+        const datos = req.body;
+        const html = await renderizarCertificado(app, datos);
+        let pdf = await generarPDF(html, 'landscape');
+        pdf = await mergeConTemario(pdf, datos.temarioPDF || null);
         const archivo = nombreArchivoSeguro(datos.nombre, datos.codigo, 'Certificado');
         await fs.writeFile(path.join(CARPETA_CERTIFICADOS, archivo), pdf);
         res.setHeader('Content-Type', 'application/pdf');
@@ -309,12 +289,12 @@ app.post('/api/generar-pdf-individual', async (req, res) => {
     }
 });
 
-// --- GENERAR CONSTANCIA INDIVIDUAL ---
 app.post('/api/generar-pdf-individual-constancia', async (req, res) => {
     try {
         const datos = req.body;
         const html = await renderizarConstancia(app, datos);
-        const pdf = await generarPDF(html, 'portrait');
+        let pdf = await generarPDF(html, 'portrait');
+        pdf = await mergeConTemario(pdf, datos.temarioPDF || null);
         const archivo = nombreArchivoSeguro(datos.nombre, datos.codigo, 'Constancia');
         await fs.writeFile(path.join(CARPETA_CERTIFICADOS, archivo), pdf);
         res.setHeader('Content-Type', 'application/pdf');
@@ -326,11 +306,9 @@ app.post('/api/generar-pdf-individual-constancia', async (req, res) => {
     }
 });
 
-
-
 // --- GENERAR LOTE (certificados o constancias) ---
 app.post('/api/generar-lote', async (req, res) => {
-    const { alumnos, cursoNombre, docenteNombre, fechaInicio, fechaFin, creditos, firmaManual, tipo, incluirQR } = req.body;
+    const { alumnos, cursoNombre, docenteNombre, fechaInicio, fechaFin, creditos, firmaManual, tipo, incluirQR, temarioPDF } = req.body;
     if (!alumnos || alumnos.length === 0) return res.status(400).json({ error: 'Sin alumnos.' });
 
     const esConstancia = tipo === 'constancia';
@@ -352,7 +330,8 @@ app.post('/api/generar-lote', async (req, res) => {
             const html = esConstancia
                 ? await renderizarConstancia(app, datos)
                 : await renderizarCertificado(app, datos);
-            const pdf = await generarPDF(html, esConstancia ? 'portrait' : 'landscape');
+            let pdf = await generarPDF(html, esConstancia ? 'portrait' : 'landscape');
+            pdf = await mergeConTemario(pdf, temarioPDF || null);
             const prefijo = esConstancia ? 'Constancia' : 'Certificado';
             const archivo = nombreArchivoSeguro(alumno.nombre, alumno.codigo, prefijo);
             await fs.writeFile(path.join(CARPETA_CERTIFICADOS, archivo), pdf);
@@ -389,7 +368,7 @@ app.get('/api/clase/:id', async (req, res) => {
         console.log("Consultando a:", url); // Esto te servirá para ver la URL en la terminal
 
         const respuesta = await axios.get(url);
-
+        
         if (respuesta.data) {
             // Enviamos los datos al frontend (index.ejs)
             res.json(respuesta.data);
@@ -410,9 +389,9 @@ app.patch('/api/clase/:id/short-description', async (req, res) => {
 
     try {
         const url = `${DOMINIO}/api/v3/courses/${cursoId}?api_key=${API_KEY}`;
-
+        
         const respuesta = await axios.patch(url, {
-            short_description: short_description
+                short_description: short_description
         }, {
             headers: {
                 'Content-Type': 'application/json'
@@ -422,58 +401,12 @@ app.patch('/api/clase/:id/short-description', async (req, res) => {
         res.json({ mensaje: "Actualizado con éxito mediante túnel" });
     } catch (e) {
         console.error("Error con alternativa POST:", e.response ? e.response.data : e.message);
-        res.status(500).json({
+        res.status(500).json({ 
             error: "La API sigue rechazando la actualización",
-            detalles: e.response ? e.response.data : e.message
+            detalles: e.response ? e.response.data : e.message 
         });
     }
 });
-
-
-app.get('/api/historico', async (req, res) => {
-    try {
-        const search = (req.query.search || '').toLowerCase().trim();
-        if (!search) return res.json([]);
-
-        const workbook = XLSX.readFile('./historico.xlsx');
-        const sheet = workbook.Sheets['HISTORICO'];
-        const data = XLSX.utils.sheet_to_json(sheet);
-
-        // Filtrar y Agrupar
-        const grupos = data.reduce((acc, row) => {
-            const nombreAlumno = row['DATA ALUMNO'] || 'Sin nombre';
-            if (nombreAlumno.toLowerCase().includes(search)) {
-                if (!acc[nombreAlumno]) {
-                    acc[nombreAlumno] = {
-                        alumno: nombreAlumno,
-                        cursos: []
-                    };
-                }
-                // Extraer solo la fecha sin la hora
-                const parsearFecha = (fechaStr) => {
-                    if (!fechaStr) return '';
-                    // Si viene con hora (2019-12-10 23:30:00.00), tomar solo la fecha
-                    return String(fechaStr).split(' ')[0];
-                };
-
-                acc[nombreAlumno].cursos.push({
-                    nombre: row['Curso'] || '',
-                    inicio: parsearFecha(row['Inicio']),
-                    fin: parsearFecha(row['Fin']),
-                    docente: row['DATA DOCENTE'] || ''
-                });
-            }
-            return acc;
-        }, {});
-
-        res.json(Object.values(grupos)); // Enviamos un array de alumnos con sus listas de cursos
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-
-
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Servidor Shukita v2 disponible en puerto ${PORT}`);
 });

@@ -228,6 +228,29 @@
             padding: 5px 10px;
         }
 
+        .temario-container {
+            background: #fff;
+            border-left: 5px solid #1a237e;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        .temario-preview {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #f0f4ff;
+            border: 1px solid #c5cae9;
+            border-radius: 8px;
+            padding: 10px 16px;
+            margin-top: 10px;
+        }
+        .temario-preview .pdf-icon { font-size: 1.8rem; color: #c62828; }
+        .temario-preview .pdf-info { flex: 1; }
+        .temario-preview .pdf-name { font-weight: 700; font-size: 0.9rem; color: #1a237e; }
+        .temario-preview .pdf-pages { font-size: 0.78rem; color: #666; }
+
         .loading-overlay {
             display: none;
             position: absolute;
@@ -419,6 +442,31 @@
                     </div>
                 </div>
 
+                <!-- TEMARIO -->
+                <div class="temario-container shadow-sm" id="seccionTemario">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5 class="fw-bold mb-0"><i class="bi bi-file-earmark-pdf me-2 text-danger"></i>Temario adjunto</h5>
+                        <div class="form-check form-switch mb-0">
+                            <input class="form-check-input" type="checkbox" id="switchIncluirTemario" onchange="toggleTemarioVisibilidad()">
+                            <label class="form-check-label small fw-bold" for="switchIncluirTemario">Adjuntar al certificado</label>
+                        </div>
+                    </div>
+                    <p class="text-muted small mb-3">El PDF del temario se agregará como páginas adicionales al final de cada certificado/constancia generado.</p>
+                    <div id="temarioInputArea" style="display:none;">
+                        <input type="file" id="inputTemario" class="form-control" accept="application/pdf" onchange="cargarTemario(this)">
+                        <div id="temarioPreview" style="display:none;" class="temario-preview">
+                            <i class="bi bi-file-earmark-pdf-fill pdf-icon"></i>
+                            <div class="pdf-info">
+                                <div class="pdf-name" id="temarioNombre"></div>
+                                <div class="pdf-pages" id="temarioPaginas"></div>
+                            </div>
+                            <button class="btn btn-sm btn-outline-danger" onclick="quitarTemario()" title="Quitar temario">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- FIRMA -->
                 <div class="firma-container shadow-sm" id="seccionFirma">
                     <div class="row align-items-center">
@@ -599,6 +647,31 @@
                                 <label class="form-check-label fw-semibold" for="manCheckQR">Incluir código QR global</label>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── TEMARIO ── -->
+            <div class="temario-container shadow-sm mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="fw-bold mb-0"><i class="bi bi-file-earmark-pdf me-2 text-danger"></i>Temario adjunto</h5>
+                    <div class="form-check form-switch mb-0">
+                        <input class="form-check-input" type="checkbox" id="manSwitchTemario" onchange="manToggleTemario()">
+                        <label class="form-check-label small fw-bold" for="manSwitchTemario">Adjuntar al certificado</label>
+                    </div>
+                </div>
+                <p class="text-muted small mb-3">El PDF del temario se agregará como páginas adicionales al final de cada certificado/constancia generado.</p>
+                <div id="manTemarioInputArea" style="display:none;">
+                    <input type="file" id="manInputTemario" class="form-control" accept="application/pdf" onchange="manCargarTemario(this)">
+                    <div id="manTemarioPreview" style="display:none;" class="temario-preview">
+                        <i class="bi bi-file-earmark-pdf-fill pdf-icon"></i>
+                        <div class="pdf-info">
+                            <div class="pdf-name" id="manTemarioNombre"></div>
+                            <div class="pdf-pages" id="manTemarioPaginas"></div>
+                        </div>
+                        <button class="btn btn-sm btn-outline-danger" onclick="manQuitarTemario()" title="Quitar temario">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -938,6 +1011,44 @@
                 isChecked ? "info" : "warning");
         }
 
+        // ── TEMARIO (sección Matrix) ──────────────────────────
+        let TEMARIO_BASE64 = null;
+
+        function toggleTemarioVisibilidad() {
+            const on = document.getElementById('switchIncluirTemario').checked;
+            document.getElementById('temarioInputArea').style.display = on ? 'block' : 'none';
+            if (!on) { TEMARIO_BASE64 = null; document.getElementById('temarioPreview').style.display = 'none'; }
+        }
+
+        function cargarTemario(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async e => {
+                TEMARIO_BASE64 = e.target.result;
+                document.getElementById('temarioNombre').textContent = file.name;
+                // Contar páginas con pdf-lib en cliente (usa PDF.js desde CDN)
+                try {
+                    const arrayBuf = await file.arrayBuffer();
+                    const { PDFDocument } = await import('https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/+esm');
+                    const doc = await PDFDocument.load(arrayBuf);
+                    document.getElementById('temarioPaginas').textContent = `${doc.getPageCount()} página(s)`;
+                } catch (_) {
+                    document.getElementById('temarioPaginas').textContent = `${(file.size / 1024).toFixed(1)} KB`;
+                }
+                document.getElementById('temarioPreview').style.display = 'flex';
+                mostrarToast('Temario cargado correctamente', 'success');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function quitarTemario() {
+            TEMARIO_BASE64 = null;
+            document.getElementById('inputTemario').value = '';
+            document.getElementById('temarioPreview').style.display = 'none';
+            mostrarToast('Temario eliminado', 'info');
+        }
+
         async function descargarPDF(datos, fila) {
             setBadge(fila, 'procesando');
             const tipo = getTipoDocumento();
@@ -951,7 +1062,8 @@
                 firmaManual: firmaAEnviar,
                 tipo,
                 fechaEmision: getFechaEmision(),
-                incluirQR: incluirQR
+                incluirQR: incluirQR,
+                temarioPDF: TEMARIO_BASE64 || null
             };
             const endpoint = tipo === 'constancia' ? '/api/generar-pdf-individual-constancia' : '/api/generar-pdf-individual';
             try {
@@ -1349,6 +1461,43 @@
             reader.readAsDataURL(file);
         }
 
+        // ── TEMARIO (Clase Manual) ──────────────────────────
+        let MAN_TEMARIO_BASE64 = null;
+
+        function manToggleTemario() {
+            const on = document.getElementById('manSwitchTemario').checked;
+            document.getElementById('manTemarioInputArea').style.display = on ? 'block' : 'none';
+            if (!on) { MAN_TEMARIO_BASE64 = null; document.getElementById('manTemarioPreview').style.display = 'none'; }
+        }
+
+        function manCargarTemario(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async e => {
+                MAN_TEMARIO_BASE64 = e.target.result;
+                document.getElementById('manTemarioNombre').textContent = file.name;
+                try {
+                    const arrayBuf = await file.arrayBuffer();
+                    const { PDFDocument } = await import('https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/+esm');
+                    const doc = await PDFDocument.load(arrayBuf);
+                    document.getElementById('manTemarioPaginas').textContent = `${doc.getPageCount()} página(s)`;
+                } catch (_) {
+                    document.getElementById('manTemarioPaginas').textContent = `${(file.size / 1024).toFixed(1)} KB`;
+                }
+                document.getElementById('manTemarioPreview').style.display = 'flex';
+                mostrarToast('Temario cargado correctamente', 'success');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function manQuitarTemario() {
+            MAN_TEMARIO_BASE64 = null;
+            document.getElementById('manInputTemario').value = '';
+            document.getElementById('manTemarioPreview').style.display = 'none';
+            mostrarToast('Temario eliminado', 'info');
+        }
+
         function manCodigoAlumno(idx) {
             const prefijo = (document.getElementById('manPrefijo').value || 'NH-MAN').trim();
             return `${prefijo}-${(idx + 1).toString().padStart(3, '0')}`;
@@ -1502,7 +1651,8 @@
                         tipoHoras: base.tipoHoras,
                         firmaManual,
                         incluirQR: base.incluirQR,
-                        fechaEmision: base.fechaEmision
+                        fechaEmision: base.fechaEmision,
+                        temarioPDF: MAN_TEMARIO_BASE64 || null
                     })
                 });
                 if (!res.ok) throw new Error(await res.text());
@@ -1554,7 +1704,8 @@
                             tipoHoras: base.tipoHoras,
                             firmaManual,
                             incluirQR: base.incluirQR,
-                            fechaEmision: base.fechaEmision
+                            fechaEmision: base.fechaEmision,
+                            temarioPDF: MAN_TEMARIO_BASE64 || null
                         })
                     });
                     if (!res.ok) throw new Error(await res.text());

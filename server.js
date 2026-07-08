@@ -100,7 +100,8 @@ function renderizarCertificado(app, datos) {   // ← quita el parámetro req
             fondoSrc,
             qrSrc: qrSrc,
             firmaDocenteSrc: datos.firmaManual || "",
-            fechaEmision: datos.fechaEmision || getFechaHoy()  // ← lee de datos, no de req
+            fechaEmision: datos.fechaEmision || getFechaHoy(),  // ← lee de datos, no de req
+            nota: datos.nota || ""
         }, (err, html) => {
             if (err) return reject(err);
             resolve(html);
@@ -325,7 +326,8 @@ app.post('/api/generar-lote', async (req, res) => {
                 fin: fechaFin,
                 creditos,
                 firmaManual: esConstancia ? "" : firmaManual,
-                incluirQR: incluirQR
+                incluirQR: incluirQR,
+                nota: alumno.nota || ""
             };
             const html = esConstancia
                 ? await renderizarConstancia(app, datos)

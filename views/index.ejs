@@ -708,10 +708,16 @@
                 <div class="card-body p-4">
                     <!-- Agregar uno a uno -->
                     <div class="row g-2 mb-3 align-items-end">
-                        <div class="col-md-9">
+                        <div class="col-md-7">
                             <label class="form-label fw-semibold">Apellidos y Nombres (en mayúsculas)</label>
                             <input type="text" id="manNuevoAlumno" class="form-control"
                                 placeholder="Ej: GARCÍA FLORES, ANA MARÍA"
+                                onkeydown="if(event.key==='Enter'){manAgregarAlumno();}">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label fw-semibold">Nota</label>
+                            <input type="text" id="manNuevaNota" class="form-control"
+                                placeholder="Ej: 18"
                                 onkeydown="if(event.key==='Enter'){manAgregarAlumno();}">
                         </div>
                         <div class="col-md-3">
@@ -746,6 +752,7 @@
                                     </th>
                                     <th>CÓDIGO NH</th>
                                     <th>APELLIDOS Y NOMBRES</th>
+                                    <th class="text-center" width="90">NOTA</th>
                                     <th class="text-center" width="80">ESTADO</th>
                                     <th class="text-center" width="100">ACCIÓN</th>
                                 </tr>
@@ -1532,6 +1539,11 @@
                     </td>
                     <td><code class="fw-bold text-primary">${a.codigo}</code></td>
                     <td class="fw-semibold">${a.nombre}</td>
+                    <td class="text-center">
+                        <input type="text" class="form-control form-control-sm text-center" style="min-width:70px"
+                            value="${a.nota || ''}" placeholder="—"
+                            onchange="manActualizarNota(${i}, this.value)">
+                    </td>
                     <td class="text-center"><span class="badge rounded-pill ${badgeClass}">${badgeText}</span></td>
                     <td class="text-center d-flex gap-1 justify-content-center">
                         <button class="btn btn-sm btn-outline-primary" title="Descargar individual" onclick="manDescargarUno(${i})">
@@ -1547,15 +1559,23 @@
 
         function manAgregarAlumno() {
             const input = document.getElementById('manNuevoAlumno');
+            const inputNota = document.getElementById('manNuevaNota');
             const nombre = input.value.trim().toUpperCase();
+            const nota = inputNota.value.trim();
             if (!nombre) { mostrarToast('Escribe el nombre del alumno', 'warning'); return; }
             if (manAlumnos.some(a => a.nombre === nombre)) { mostrarToast('Ese alumno ya está en la lista', 'warning'); return; }
-            manAlumnos.push({ nombre, codigo: '', estado: 'pendiente' });
+            manAlumnos.push({ nombre, codigo: '', estado: 'pendiente', nota });
             manAlumnos.sort((a, b) => a.nombre.localeCompare(b.nombre));
             manRenumerarCodigos();
             manRenderTabla();
             input.value = '';
+            inputNota.value = '';
             input.focus();
+        }
+
+        function manActualizarNota(idx, valor) {
+            if (!manAlumnos[idx]) return;
+            manAlumnos[idx].nota = valor.trim();
         }
 
         function manEliminarAlumno(idx) {
@@ -1571,7 +1591,7 @@
             let agregados = 0;
             lineas.forEach(nombre => {
                 if (!manAlumnos.some(a => a.nombre === nombre)) {
-                    manAlumnos.push({ nombre, codigo: '', estado: 'pendiente' });
+                    manAlumnos.push({ nombre, codigo: '', estado: 'pendiente', nota: '' });
                     agregados++;
                 }
             });
@@ -1652,7 +1672,8 @@
                         firmaManual,
                         incluirQR: base.incluirQR,
                         fechaEmision: base.fechaEmision,
-                        temarioPDF: MAN_TEMARIO_BASE64 || null
+                        temarioPDF: MAN_TEMARIO_BASE64 || null,
+                        nota: alumno.nota || ''
                     })
                 });
                 if (!res.ok) throw new Error(await res.text());
@@ -1705,7 +1726,8 @@
                             firmaManual,
                             incluirQR: base.incluirQR,
                             fechaEmision: base.fechaEmision,
-                            temarioPDF: MAN_TEMARIO_BASE64 || null
+                            temarioPDF: MAN_TEMARIO_BASE64 || null,
+                            nota: alumno.nota || ''
                         })
                     });
                     if (!res.ok) throw new Error(await res.text());

@@ -149,6 +149,37 @@ function renderizarConstancia(app, datos) {
     });
 }
 
+function renderizarCartaITIL(app, datos) {
+    const fondoPath = path.join(__dirname, 'public', 'images', 'fondo_carta itil.png');
+    const fondoBase64 = fsSync.readFileSync(fondoPath, { encoding: 'base64' });
+    const fondoSrc = `data:image/png;base64,${fondoBase64}`;
+
+    const fontPath = path.join(__dirname, 'public', 'fonts', 'DancingScript[wght].ttf');
+    const fontBase64 = fsSync.readFileSync(fontPath, { encoding: 'base64' });
+    const fontSrc = `data:font/truetype;base64,${fontBase64}`;
+
+    return new Promise((resolve, reject) => {
+        app.render('cartaitil', {
+            nombreAlumno: datos.nombre,
+            nombreCurso: datos.curso,
+            creditos: datos.creditos,
+            tipoHoras: datos.tipoHoras || 'académicas',
+            inicio: datos.inicio,
+            fin: datos.fin,
+            nombreDocente: datos.docente,
+            codigoNH: datos.codigo,
+            fondoSrc,
+            fontSrc,
+            firmaDocenteSrc: datos.firmaManual || "",
+            fechaEmision: datos.fechaEmision || getFechaHoy()
+        }, (err, html) => {
+            if (err) return reject(err);
+            resolve(html);
+        });
+    });
+}
+
+
 // --- GENERACIÓN DE PDF CON PUPPETEER ---
 async function generarPDF(html, orientacion = 'landscape') {
     const browser = await puppeteer.launch({
@@ -263,7 +294,7 @@ app.post('/buscar', async (req, res) => {
             fechaInicio: formatearFecha(c.start_at),
             fechaFin: formatearFecha(c.finish_at),
             horasAcademicas: c.section_code || "0",
-            horasCronologicas: c.credits  || "0",
+            horasCronologicas: c.credits || "0",
             cursoId,
             total: alumnosFinal.length
         });
@@ -307,12 +338,30 @@ app.post('/api/generar-pdf-individual-constancia', async (req, res) => {
     }
 });
 
+app.post('/api/generar-pdf-individual-cartaitil', async (req, res) => {
+    try {
+        const datos = req.body;
+        const html = await renderizarCartaITIL(app, datos);
+        let pdf = await generarPDF(html, 'portrait');
+        pdf = await mergeConTemario(pdf, datos.temarioPDF || null);
+        const archivo = nombreArchivoSeguro(datos.nombre, datos.codigo, 'CartaITIL');
+        await fs.writeFile(path.join(CARPETA_CERTIFICADOS, archivo), pdf);
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${archivo}"`);
+        res.send(pdf);
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ error: 'Error al generar carta ITIL: ' + e.message });
+    }
+});
+
 // --- GENERAR LOTE (certificados o constancias) ---
 app.post('/api/generar-lote', async (req, res) => {
     const { alumnos, cursoNombre, docenteNombre, fechaInicio, fechaFin, creditos, firmaManual, tipo, incluirQR, temarioPDF } = req.body;
     if (!alumnos || alumnos.length === 0) return res.status(400).json({ error: 'Sin alumnos.' });
 
     const esConstancia = tipo === 'constancia';
+    const esCartaITIL = tipo === 'cartaitil';
     const resultados = [];
 
     for (const alumno of alumnos) {
@@ -329,12 +378,14 @@ app.post('/api/generar-lote', async (req, res) => {
                 incluirQR: incluirQR,
                 nota: alumno.nota || ""
             };
-            const html = esConstancia
-                ? await renderizarConstancia(app, datos)
-                : await renderizarCertificado(app, datos);
-            let pdf = await generarPDF(html, esConstancia ? 'portrait' : 'landscape');
+            const html = esCartaITIL
+                ? await renderizarCartaITIL(app, datos)
+                : esConstancia
+                    ? await renderizarConstancia(app, datos)
+                    : await renderizarCertificado(app, datos);
+            let pdf = await generarPDF(html, (esConstancia || esCartaITIL) ? 'portrait' : 'landscape');
             pdf = await mergeConTemario(pdf, temarioPDF || null);
-            const prefijo = esConstancia ? 'Constancia' : 'Certificado';
+            const prefijo = esCartaITIL ? 'CartaITIL' : (esConstancia ? 'Constancia' : 'Certificado');
             const archivo = nombreArchivoSeguro(alumno.nombre, alumno.codigo, prefijo);
             await fs.writeFile(path.join(CARPETA_CERTIFICADOS, archivo), pdf);
             resultados.push({ nombre: alumno.nombre, estado: 'ok' });
@@ -370,7 +421,7 @@ app.get('/api/clase/:id', async (req, res) => {
         console.log("Consultando a:", url); // Esto te servirá para ver la URL en la terminal
 
         const respuesta = await axios.get(url);
-        
+
         if (respuesta.data) {
             // Enviamos los datos al frontend (index.ejs)
             res.json(respuesta.data);
@@ -391,9 +442,9 @@ app.patch('/api/clase/:id/short-description', async (req, res) => {
 
     try {
         const url = `${DOMINIO}/api/v3/courses/${cursoId}?api_key=${API_KEY}`;
-        
+
         const respuesta = await axios.patch(url, {
-                short_description: short_description
+            short_description: short_description
         }, {
             headers: {
                 'Content-Type': 'application/json'
@@ -403,9 +454,9 @@ app.patch('/api/clase/:id/short-description', async (req, res) => {
         res.json({ mensaje: "Actualizado con éxito mediante túnel" });
     } catch (e) {
         console.error("Error con alternativa POST:", e.response ? e.response.data : e.message);
-        res.status(500).json({ 
+        res.status(500).json({
             error: "La API sigue rechazando la actualización",
-            detalles: e.response ? e.response.data : e.message 
+            detalles: e.response ? e.response.data : e.message
         });
     }
 });

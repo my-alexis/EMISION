@@ -160,6 +160,12 @@
             border-color: #e67e22;
         }
 
+        .tipo-selector .btn-check:checked+.btn-outline-success {
+            background-color: #2e7d32;
+            color: white;
+            border-color: #2e7d32;
+        }
+
         .tipo-badge-certificado {
             background: #1a237e;
             color: white;
@@ -167,6 +173,11 @@
 
         .tipo-badge-constancia {
             background: #e67e22;
+            color: white;
+        }
+
+        .tipo-badge-cartaitil {
+            background: #2e7d32;
             color: white;
         }
 
@@ -378,6 +389,13 @@
                                             value="constancia">
                                         <label class="btn btn-outline-warning px-4" for="tipoConstancia">
                                             <i class="bi bi-file-earmark-check-fill me-2"></i>Constancia
+                                        </label>
+                                    </div>
+                                    <div>
+                                        <input type="radio" class="btn-check" name="tipoDoc" id="tipoCartaITIL"
+                                            value="cartaitil">
+                                        <label class="btn btn-outline-success px-4" for="tipoCartaITIL">
+                                            <i class="bi bi-patch-check-fill me-2"></i>Carta ITIL
                                         </label>
                                     </div>
                                 </div>
@@ -625,6 +643,10 @@
                                 <div>
                                     <input type="radio" class="btn-check" name="manTipoDoc" id="manTipoCons" value="constancia" onchange="manToggleTipo()">
                                     <label class="btn btn-outline-warning px-4" for="manTipoCons"><i class="bi bi-file-earmark-check-fill me-2"></i>Constancia</label>
+                                </div>
+                                <div>
+                                    <input type="radio" class="btn-check" name="manTipoDoc" id="manTipoCartaITIL" value="cartaitil" onchange="manToggleTipo()">
+                                    <label class="btn btn-outline-success px-4" for="manTipoCartaITIL"><i class="bi bi-patch-check-fill me-2"></i>Carta ITIL</label>
                                 </div>
                             </div>
                         </div>
@@ -978,19 +1000,33 @@
             return document.getElementById('horasAcademicasRadio').checked ? 'académicas' : 'cronológicas';
         }
 
+        // Mapa de endpoints por tipo de documento (certificaciones)
+        const ENDPOINTS_TIPO = {
+            certificado: '/api/generar-pdf-individual',
+            constancia: '/api/generar-pdf-individual-constancia',
+            cartaitil: '/api/generar-pdf-individual-cartaitil'
+        };
+        const PREFIJOS_TIPO = {
+            certificado: 'Certificado',
+            constancia: 'Constancia',
+            cartaitil: 'CartaITIL'
+        };
+        const BADGES_TIPO = {
+            certificado: { texto: 'CERTIFICADO', clase: 'badge tipo-badge-certificado rounded-pill px-3' },
+            constancia: { texto: 'CONSTANCIA', clase: 'badge tipo-badge-constancia rounded-pill px-3' },
+            cartaitil: { texto: 'CARTA ITIL', clase: 'badge tipo-badge-cartaitil rounded-pill px-3' }
+        };
+
         document.querySelectorAll('input[name="tipoDoc"]').forEach(radio => {
             radio.addEventListener('change', () => {
-                const esCertificado = document.getElementById('tipoCertificado').checked;
-                document.getElementById('seccionFirma').style.display = esCertificado ? 'block' : 'none';
-                document.getElementById('notaConstancia').classList.toggle('d-none', esCertificado);
+                const tipo = getTipoDocumento();
+                // La firma solo aplica a Certificado; Constancia y Carta ITIL no la usan
+                document.getElementById('seccionFirma').style.display = tipo === 'certificado' ? 'block' : 'none';
+                document.getElementById('notaConstancia').classList.toggle('d-none', tipo !== 'constancia');
                 const badge = document.getElementById('tipoBadge');
-                if (esCertificado) {
-                    badge.textContent = 'CERTIFICADO';
-                    badge.className = 'badge tipo-badge-certificado rounded-pill px-3';
-                } else {
-                    badge.textContent = 'CONSTANCIA';
-                    badge.className = 'badge tipo-badge-constancia rounded-pill px-3';
-                }
+                const info = BADGES_TIPO[tipo];
+                badge.textContent = info.texto;
+                badge.className = info.clase;
             });
         });
 
@@ -1072,7 +1108,7 @@
                 incluirQR: incluirQR,
                 temarioPDF: TEMARIO_BASE64 || null
             };
-            const endpoint = tipo === 'constancia' ? '/api/generar-pdf-individual-constancia' : '/api/generar-pdf-individual';
+            const endpoint = ENDPOINTS_TIPO[tipo];
             try {
                 const res = await fetch(endpoint, {
                     method: 'POST',
@@ -1084,7 +1120,7 @@
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                const prefijo = tipo === 'constancia' ? 'Constancia' : 'Certificado';
+                const prefijo = PREFIJOS_TIPO[tipo];
                 a.download = `${prefijo}_${datos.nombre.replace(/ /g, '_')}.pdf`;
                 document.body.appendChild(a); a.click(); a.remove();
                 URL.revokeObjectURL(url);
@@ -1126,7 +1162,8 @@
             const checks = document.querySelectorAll('.alumno-check:checked');
             if (checks.length === 0) { mostrarToast('Selecciona al menos un alumno.', 'warning'); return; }
             const tipo = getTipoDocumento();
-            const label = tipo === 'constancia' ? 'constancia(s)' : 'certificado(s)';
+            const labelMap = { certificado: 'certificado(s)', constancia: 'constancia(s)', cartaitil: 'carta(s) ITIL' };
+            const label = labelMap[tipo];
             if (!confirm(`¿Generar ${checks.length} ${label}?`)) return;
             for (const check of checks) {
                 const fila = check.closest('tr');
@@ -1445,9 +1482,11 @@
         }
 
         function manToggleTipo() {
-            const esCons = document.querySelector('input[name="manTipoDoc"]:checked').value === 'constancia';
-            document.getElementById('manSeccionFirma').style.opacity = esCons ? '0.4' : '1';
-            document.getElementById('manSeccionFirma').style.pointerEvents = esCons ? 'none' : '';
+            // La firma solo aplica a Certificado; Constancia y Carta ITIL no la usan
+            const tipo = document.querySelector('input[name="manTipoDoc"]:checked').value;
+            const usaFirma = tipo === 'certificado';
+            document.getElementById('manSeccionFirma').style.opacity = usaFirma ? '1' : '0.4';
+            document.getElementById('manSeccionFirma').style.pointerEvents = usaFirma ? '' : 'none';
         }
 
         function manToggleFirmaVis() {
@@ -1634,7 +1673,8 @@
         async function manGetFirmaBase64() {
             const incluirFirma = document.getElementById('manSwitchFirma').checked;
             const tipo = document.querySelector('input[name="manTipoDoc"]:checked').value;
-            if (!incluirFirma || tipo === 'constancia') return '';
+            // La firma solo se envía en Certificado
+            if (!incluirFirma || tipo !== 'certificado') return '';
             const file = document.getElementById('manInputFirma').files[0];
             if (!file) return '';
             return new Promise(resolve => {
@@ -1649,9 +1689,7 @@
             if (!base) return;
             const alumno = manAlumnos[idx];
             const firmaManual = await manGetFirmaBase64();
-            const endpoint = base.tipo === 'constancia'
-                ? '/api/generar-pdf-individual-constancia'
-                : '/api/generar-pdf-individual';
+            const endpoint = ENDPOINTS_TIPO[base.tipo];
 
             manAlumnos[idx].estado = 'procesando';
             manRenderTabla();
@@ -1681,7 +1719,7 @@
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                const prefijo = base.tipo === 'constancia' ? 'Constancia' : 'Certificado';
+                const prefijo = PREFIJOS_TIPO[base.tipo];
                 a.download = `${prefijo}_${alumno.nombre.replace(/\s+/g, '_')}_${alumno.codigo}.pdf`;
                 a.click();
                 URL.revokeObjectURL(url);
@@ -1705,9 +1743,7 @@
 
             for (const alumno of seleccionados) {
                 const idx = manAlumnos.indexOf(alumno);
-                const endpoint = base.tipo === 'constancia'
-                    ? '/api/generar-pdf-individual-constancia'
-                    : '/api/generar-pdf-individual';
+                const endpoint = ENDPOINTS_TIPO[base.tipo];
                 manAlumnos[idx].estado = 'procesando';
                 manRenderTabla();
                 try {
@@ -1735,7 +1771,7 @@
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    const prefijo = base.tipo === 'constancia' ? 'Constancia' : 'Certificado';
+                    const prefijo = PREFIJOS_TIPO[base.tipo];
                     a.download = `${prefijo}_${alumno.nombre.replace(/\s+/g, '_')}_${alumno.codigo}.pdf`;
                     a.click();
                     URL.revokeObjectURL(url);

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        @font-face {
+            font-family: 'Dancing Script';
+            src: url('<%= fontSrc %>') format('truetype');
+            font-weight: 500;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Calibri', 'Segoe UI', Arial, sans-serif;
+            background-color: #ffffff;
+            color: #222;
+        }
+
+        .page {
+            width: 210mm;
+            height: 297mm;
+            position: relative;
+            overflow: hidden;
+            background-image: url('<%= fondoSrc %>');
+            background-size: 100% 100%;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        /* ── CONTENIDO PRINCIPAL ── */
+        .main-content {
+            position: absolute;
+            top: 140px;
+            left: 120px;
+            right: 120px;
+            bottom: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        .titulo {
+            text-align: center;
+            font-size: 22px;
+            font-weight: 900;
+            font-family: 'Tahoma', sans-serif;
+            letter-spacing: 2px;
+            color: #1a1a1a;
+            margin-bottom: 40px;
+            margin-top: 20px;
+        }
+
+        .cuerpo {
+            font-size: 13.5px;
+            line-height: 1.7;
+            font-family: 'Tahoma', sans-serif;
+            color: #222;
+            text-align: justify;
+            margin-bottom: 10px;
+        }
+
+        .nombre-alumno {
+            display: block;
+            text-align: center;
+            font-size: 26px;
+            font-family: 'Tahoma', sans-serif;
+            font-weight: 900;
+            color: #1a1a1a;
+            margin: 18px 0 18px 0;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .fecha-emision {
+            font-size: 13.5px;
+            font-family: 'Tahoma', sans-serif;
+            color: #222;
+            margin-top: 20px;
+            margin-bottom: 0;
+        }
+
+        /* ── SECCIÓN DE FIRMAS ── */
+        .firmas-section {
+            position: absolute;
+            bottom: 320px;
+            left: 120px;
+            right: 120px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .firma-bloque {
+            text-align: center;
+        }
+
+        .firma-manuscrita {
+            /* Fuente que más se parece a la imagen */
+            font-family: 'Dancing Script', cursive;
+            font-size: 26px;
+            /* Aumentado para que destaque como en la imagen */
+            color: #1a1a1a;
+            font-weight: 500;
+            /* No muy gruesa para que no se empaste */
+            margin-bottom: 5px;
+            line-height: 1;
+            display: block;
+        }
+
+        .firma-img {
+            height: 55px;
+            width: auto;
+            display: block;
+            margin: 0 auto 0 auto;
+            mix-blend-mode: multiply;
+        }
+
+        .firma-linea {
+            /* Color naranja exacto y grosor de la imagen */
+            border-top: 3.5px solid #e67e22;
+            margin-bottom: 8px;
+            margin-top: 0px;
+            width: 180px;
+            /* Ancho fijo para que se vea igual a la imagen */
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .firma-nombre {
+            font-family: 'Tahoma', sans-serif;
+            font-size: 13px;
+            /* Un poco más grande */
+            font-weight: 700;
+            color: #222;
+            margin-bottom: 3px;
+            text-transform: none;
+            /* En la imagen no es todo mayúsculas */
+        }
+
+        .firma-cargo {
+            font-family: 'Tahoma', sans-serif;
+            font-size: 11px;
+            font-weight: 900;
+            /* Más negrita para el cargo */
+            color: #222;
+            text-transform: capitalize;
+        }
+
+        /* ── CÓDIGO NH ── */
+        .codigo-nh {
+            position: absolute;
+            bottom: 110px;
+            right: 60px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #1a237e;
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page">
+        <div class="main-content">
+            <br><br><br>
+            <div class="location-date">
+                Lima, <%= fechaEmision %>
+            </div><br>
+            <div class="titulo">CARTA DE PARTICIPACIÓN</div>
+            <br>
+
+            <div class="cuerpo">
+                Esta es una carta que confirma la partipación al curso, no es un documento que demuestre o certifique el logro de cualquier calificación en el tema del curso de Capacitación.
+                Esta carta es para verificar que
+            </div>
+
+            <span class="nombre-alumno">
+                <%= nombreAlumno %>
+            </span>
+            <br>
+            <div class="cuerpo">
+                Ha asistido al curso <strong>"<%= nombreCurso %>"</strong><br>
+                con una duración total de </strong> horas <%= tipoHoras %>, en New Horizons Perú.
+                <br><br>
+                <strong>Período</strong><br>
+                Inicio: <%= inicio %><br>
+                Fin: <%= fin %><br>
+                PDUs: 20<br>
+                Código: 31538DXVRX0
+            </div>
+            <br>
+        </div>
+        <br><br>
+        <!-- FIRMAS -->
+        <div class="firmas-section">
+            <!-- Firma Instructor -->
+            <div class="firma-bloque">
+                <% if (firmaDocenteSrc && firmaDocenteSrc !=="" ) { %>
+                    <img src="<%= firmaDocenteSrc %>" class="firma-img">
+                    <% } else { %>
+                        <span class="firma-manuscrita">
+                            <%= nombreDocente.split(' ').slice(0, 3).join(' ') %>
+                        </span>
+                    <% } %>
+                    <div class="firma-linea"></div>
+                    <div class="firma-nombre"><%= nombreDocente %></div>
+                    <div class="firma-cargo">Instructor</div>
+            </div>
+                <!-- Firma Gerente -->
+           <div class="firma-bloque">
+                <span class="firma-manuscrita">Enrique Huaman</span>
+                <div class="firma-linea"></div>
+                <div class="firma-nombre">ENRIQUE HUAMAN FARFAN</div>
+                <div class="firma-cargo">Director Académico</div>
+            </div>
+
+            </div>
+
+        <!-- CÓDIGO NH -->
+        <div class="codigo-nh">
+            <%= codigoNH %>
+        </div>
+        <div class="cuerpo">
+        </div>                
+    </div>
+</body>
+
+</html>

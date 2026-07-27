@@ -1657,7 +1657,7 @@
             const tipoHoras = document.querySelector('input[name="manTipoHoras"]:checked').value;
             const horasAcad = document.getElementById('manHorasAcad').value || '0';
             const horasCron = document.getElementById('manHorasCron').value || '0';
-            const creditos = tipoHoras === 'academicas' ? horasAcad : horasCron;
+            const creditos = tipoHoras === 'académicas' ? horasAcad : horasCron;
             const tipo = document.querySelector('input[name="manTipoDoc"]:checked').value;
             const incluirQR = document.getElementById('manCheckQR').checked;
             const fechaEmision = manFechaISO_a_Texto(document.getElementById('manFechaEmision').value);

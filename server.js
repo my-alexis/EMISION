@@ -10,75 +10,138 @@ const fsSync = require('fs');
 const { PDFDocument } = require('pdf-lib');
 
 const app = express();
+
 app.use(express.static('public'));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// --- CONFIGURACIÓN ---
+// ============================================================
+// CONFIGURACIÓN
+// ============================================================
+
 const API_KEY = '4ea187998ed58eb48fae278a457fc57f023eb5277de7139943b6';
 const DOMINIO = 'https://newhorizonsperu.matrixlms.com';
-const CARPETA_CERTIFICADOS = path.join(__dirname, 'certificados_generados');
 
-const QR_GLOBAL_PATH = path.join(__dirname, 'public/images/codeqr.png');
+const CARPETA_CERTIFICADOS = path.join(
+    __dirname,
+    'certificados_generados'
+);
+
+const QR_GLOBAL_PATH = path.join(
+    __dirname,
+    'public/images/codeqr.png'
+);
 
 if (!fsSync.existsSync(CARPETA_CERTIFICADOS)) {
-    fsSync.mkdirSync(CARPETA_CERTIFICADOS, { recursive: true });
-}
-if (!fsSync.existsSync(path.join(__dirname, 'public/images'))) {
-    fsSync.mkdirSync(path.join(__dirname, 'public/images'), { recursive: true });
+    fsSync.mkdirSync(CARPETA_CERTIFICADOS, {
+        recursive: true
+    });
 }
 
-// --- UTILIDADES ---
+if (!fsSync.existsSync(path.join(__dirname, 'public/images'))) {
+    fsSync.mkdirSync(
+        path.join(__dirname, 'public/images'),
+        {
+            recursive: true
+        }
+    );
+}
+
+// ============================================================
+// UTILIDADES
+// ============================================================
+
 const getImagenBase64 = (nombreArchivo) => {
     try {
-        const ruta = path.join(process.cwd(), 'public/images', nombreArchivo);
+        const ruta = path.join(
+            process.cwd(),
+            'public/images',
+            nombreArchivo
+        );
+
         if (fsSync.existsSync(ruta)) {
-            const data = fsSync.readFileSync(ruta, { encoding: 'base64' });
+            const data = fsSync.readFileSync(
+                ruta,
+                { encoding: 'base64' }
+            );
             return `data:image/png;base64,${data}`;
         }
     } catch (e) {
-        console.error(`Error cargando ${nombreArchivo}:`, e.message);
+        console.error(
+            `Error cargando ${nombreArchivo}:`,
+            e.message
+        );
     }
     return "";
 };
 
 const formatearFecha = (fechaISO) => {
-    if (!fechaISO || fechaISO === "No definida") return "---";
+    if (!fechaISO || fechaISO === "No definida") {
+        return "---";
+    }
+
     const fecha = new Date(fechaISO);
-    return new Intl.DateTimeFormat('es-PE', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-        timeZone: 'UTC'
-    }).format(fecha);
+    return new Intl.DateTimeFormat(
+        'es-PE',
+        {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+            timeZone: 'UTC'
+        }
+    ).format(fecha);
 };
 
-// Fecha de hoy en formato largo español
 const getFechaHoy = () => {
-    return new Intl.DateTimeFormat('es-PE', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-    }).format(new Date());
+    return new Intl.DateTimeFormat(
+        'es-PE',
+        {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        }
+    ).format(new Date());
 };
 
-function renderizarCertificado(app, datos) {   // ← quita el parámetro req
+// ============================================================
+// RENDERIZAR CERTIFICADO ESTÁNDAR
+// ============================================================
+
+function renderizarCertificado(app, datos) {
     const logoSrc = getImagenBase64('logoNH.png');
     const firmaFijaSrc = getImagenBase64('firma_juan.png');
-    const fondoPath = path.join(__dirname, 'public', 'images', 'fondo_certificado.png');
-    const fondoBase64 = fsSync.readFileSync(fondoPath, { encoding: 'base64' });
+    const fondoPath = path.join(
+        __dirname,
+        'public',
+        'images',
+        'fondo_certificado.png'
+    );
+    const fondoBase64 = fsSync.readFileSync(
+        fondoPath,
+        { encoding: 'base64' }
+    );
     const fondoSrc = `data:image/png;base64,${fondoBase64}`;
 
-    // --- LÓGICA PARA EL QR GLOBAL ---
     let qrSrc = "";
-    // Verificamos si en los datos viene la instrucción de incluir QR
-    if (datos.incluirQR === 'on' || datos.incluirQR === 'true' || datos.incluirQR === true) {
+    if (
+        datos.incluirQR === 'on' ||
+        datos.incluirQR === 'true' ||
+        datos.incluirQR === true
+    ) {
         try {
-            // Usamos el nombre del archivo que subiste
-            const qrPath = path.join(__dirname, 'public', 'images', 'codeqr.png');
-            const qrBase64 = fsSync.readFileSync(qrPath, { encoding: 'base64' });
+            const qrPath = path.join(
+                __dirname,
+                'public',
+                'images',
+                'codeqr.png'
+            );
+            const qrBase64 = fsSync.readFileSync(
+                qrPath,
+                { encoding: 'base64' }
+            );
             qrSrc = `data:image/png;base64,${qrBase64}`;
         } catch (err) {
             console.error("Error al cargar el archivo QR PNG:", err);
@@ -86,35 +149,117 @@ function renderizarCertificado(app, datos) {   // ← quita el parámetro req
     }
 
     return new Promise((resolve, reject) => {
-        app.render('certificado', {
-            nombreAlumno: datos.nombre,
-            nombreCurso: datos.curso,
-            creditos: datos.creditos,
-            tipoHoras: datos.tipoHoras || 'académicas',
-            inicio: datos.inicio,
-            fin: datos.fin,
-            nombreDocente: datos.docente,
-            codigoNH: datos.codigo,
-            logoSrc,
-            firmaFijaSrc,
-            fondoSrc,
-            qrSrc: qrSrc,
-            firmaDocenteSrc: datos.firmaManual || "",
-            fechaEmision: datos.fechaEmision || getFechaHoy(),  // ← lee de datos, no de req
-            nota: datos.nota || ""
-        }, (err, html) => {
-            if (err) return reject(err);
-            resolve(html);
-        });
+        app.render(
+            'certificado',
+            {
+                nombreAlumno: datos.nombre,
+                nombreCurso: datos.curso,
+                creditos: datos.creditos,
+                tipoHoras: datos.tipoHoras || 'académicas',
+                inicio: datos.inicio,
+                fin: datos.fin,
+                nombreDocente: datos.docente,
+                codigoNH: datos.codigo,
+                logoSrc,
+                firmaFijaSrc,
+                fondoSrc,
+                qrSrc,
+                firmaDocenteSrc: datos.firmaManual || "",
+                fechaEmision: datos.fechaEmision || getFechaHoy(),
+                nota: datos.nota || "",
+                pdu: datos.pdu || "",
+                codigoPDU: datos.codigoPDU || ""
+            },
+            (err, html) => {
+                if (err) return reject(err);
+                resolve(html);
+            }
+        );
     });
 }
 
-// --- RENDERIZADO DE CONSTANCIA ---
-function renderizarConstancia(app, datos) {
+// ============================================================
+// RENDERIZAR CERTIFICADO PDU (CertificadoPDU.ejs)
+// ============================================================
 
+function renderizarCertificadoPDU(app, datos) {
+    const logoSrc = getImagenBase64('logoNH.png');
+    const firmaFijaSrc = getImagenBase64('firma_juan.png');
+    const fondoPath = path.join(
+        __dirname,
+        'public',
+        'images',
+        'fondo_microsoft.png'
+    );
+    const fondoBase64 = fsSync.readFileSync(
+        fondoPath,
+        { encoding: 'base64' }
+    );
+    const fondoSrc = `data:image/png;base64,${fondoBase64}`;
+
+    let qrSrc = "";
+    if (
+        datos.incluirQR === 'on' ||
+        datos.incluirQR === 'true' ||
+        datos.incluirQR === true
+    ) {
+        try {
+            const qrPath = path.join(
+                __dirname,
+                'public',
+                'images',
+                'codeqr.png'
+            );
+            const qrBase64 = fsSync.readFileSync(
+                qrPath,
+                { encoding: 'base64' }
+            );
+            qrSrc = `data:image/png;base64,${qrBase64}`;
+        } catch (err) {
+            console.error("Error al cargar el archivo QR PNG:", err);
+        }
+    }
+
+    return new Promise((resolve, reject) => {
+        app.render(
+            'CertificadoPDU',
+            {
+                nombreAlumno: datos.nombre,
+                nombreCurso: datos.curso,
+                creditos: datos.creditos,
+                tipoHoras: datos.tipoHoras || 'académicas',
+                inicio: datos.inicio,
+                fin: datos.fin,
+                nombreDocente: datos.docente,
+                codigoNH: datos.codigo,
+                logoSrc,
+                firmaFijaSrc,
+                fondoSrc,
+                qrSrc,
+                firmaDocenteSrc: datos.firmaManual || "",
+                fechaEmision: datos.fechaEmision || getFechaHoy(),
+                nota: datos.nota || "",
+                pdu: datos.pdu || "",
+                codigoPDU: datos.codigoPDU || ""
+            },
+            (err, html) => {
+                if (err) return reject(err);
+                resolve(html);
+            }
+        );
+    });
+}
+
+// ============================================================
+// RENDERIZAR CONSTANCIA
+// ============================================================
+
+function renderizarConstancia(app, datos) {
     function toTitleCase(str) {
         if (!str) return '';
-        return str.toLowerCase().replace(/(?:^|\s)\S/g, (letra) => letra.toUpperCase());
+        return str
+            .toLowerCase()
+            .replace(/(?:^|\s)\S/g, (letra) => letra.toUpperCase());
     }
 
     const firmaFijaSrc = getImagenBase64('firma_juan.png');
@@ -122,32 +267,39 @@ function renderizarConstancia(app, datos) {
     const fondoBase64 = fsSync.readFileSync(fondoPath, { encoding: 'base64' });
     const fondoSrc = `data:image/png;base64,${fondoBase64}`;
 
-    // ← Fuente embebida en base64 para Puppeteer
     const fontPath = path.join(__dirname, 'public', 'fonts', 'DancingScript[wght].ttf');
     const fontBase64 = fsSync.readFileSync(fontPath, { encoding: 'base64' });
     const fontSrc = `data:font/truetype;base64,${fontBase64}`;
 
     return new Promise((resolve, reject) => {
-        app.render('constancia', {
-            nombreAlumno: datos.nombre,
-            nombreCurso: datos.curso,
-            creditos: datos.creditos,
-            tipoHoras: datos.tipoHoras || 'académicas',
-            inicio: datos.inicio,
-            fin: datos.fin,
-            nombreDocente: toTitleCase(datos.docente),
-            codigoNH: datos.codigo,
-            firmaFijaSrc,
-            fondoSrc,
-            fontSrc, // ← agrega esto
-            firmaDocenteSrc: datos.firmaManual || "",
-            fechaEmision: datos.fechaEmision || getFechaHoy()
-        }, (err, html) => {
-            if (err) return reject(err);
-            resolve(html);
-        });
+        app.render(
+            'constancia',
+            {
+                nombreAlumno: datos.nombre,
+                nombreCurso: datos.curso,
+                creditos: datos.creditos,
+                tipoHoras: datos.tipoHoras || 'académicas',
+                inicio: datos.inicio,
+                fin: datos.fin,
+                nombreDocente: toTitleCase(datos.docente),
+                codigoNH: datos.codigo,
+                firmaFijaSrc,
+                fondoSrc,
+                fontSrc,
+                firmaDocenteSrc: datos.firmaManual || "",
+                fechaEmision: datos.fechaEmision || getFechaHoy()
+            },
+            (err, html) => {
+                if (err) return reject(err);
+                resolve(html);
+            }
+        );
     });
 }
+
+// ============================================================
+// RENDERIZAR CARTA ITIL
+// ============================================================
 
 function renderizarCartaITIL(app, datos) {
     const fondoPath = path.join(__dirname, 'public', 'images', 'fondo_carta itil.png');
@@ -159,33 +311,40 @@ function renderizarCartaITIL(app, datos) {
     const fontSrc = `data:font/truetype;base64,${fontBase64}`;
 
     return new Promise((resolve, reject) => {
-        app.render('cartaitil', {
-            nombreAlumno: datos.nombre,
-            nombreCurso: datos.curso,
-            creditos: datos.creditos,
-            tipoHoras: datos.tipoHoras || 'académicas',
-            inicio: datos.inicio,
-            fin: datos.fin,
-            nombreDocente: datos.docente,
-            codigoNH: datos.codigo,
-            fondoSrc,
-            fontSrc,
-            firmaDocenteSrc: datos.firmaManual || "",
-            fechaEmision: datos.fechaEmision || getFechaHoy()
-        }, (err, html) => {
-            if (err) return reject(err);
-            resolve(html);
-        });
+        app.render(
+            'cartaitil',
+            {
+                nombreAlumno: datos.nombre,
+                nombreCurso: datos.curso,
+                creditos: datos.creditos,
+                tipoHoras: datos.tipoHoras || 'académicas',
+                inicio: datos.inicio,
+                fin: datos.fin,
+                nombreDocente: datos.docente,
+                codigoNH: datos.codigo,
+                fondoSrc,
+                fontSrc,
+                firmaDocenteSrc: datos.firmaManual || "",
+                fechaEmision: datos.fechaEmision || getFechaHoy()
+            },
+            (err, html) => {
+                if (err) return reject(err);
+                resolve(html);
+            }
+        );
     });
 }
 
+// ============================================================
+// GENERACIÓN DE PDF
+// ============================================================
 
-// --- GENERACIÓN DE PDF CON PUPPETEER ---
 async function generarPDF(html, orientacion = 'landscape') {
     const browser = await puppeteer.launch({
         headless: 'new',
         args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
+
     try {
         const page = await browser.newPage();
         await page.setContent(html, { waitUntil: 'networkidle0' });
@@ -200,14 +359,21 @@ async function generarPDF(html, orientacion = 'landscape') {
     }
 }
 
-// --- MERGE CERTIFICADO + TEMARIO ---
-async function mergeConTemario(certificadoPdfBytes, temarioBase64) {
-    if (!temarioBase64) return certificadoPdfBytes;
-    try {
-        // temarioBase64 puede venir con o sin el prefijo data:application/pdf;base64,
-        const base64Data = temarioBase64.includes(',') ? temarioBase64.split(',')[1] : temarioBase64;
-        const temarioBytes = Buffer.from(base64Data, 'base64');
+// ============================================================
+// MERGE CERTIFICADO + TEMARIO
+// ============================================================
 
+async function mergeConTemario(certificadoPdfBytes, temarioBase64) {
+    if (!temarioBase64) {
+        return certificadoPdfBytes;
+    }
+
+    try {
+        const base64Data = temarioBase64.includes(',')
+            ? temarioBase64.split(',')[1]
+            : temarioBase64;
+
+        const temarioBytes = Buffer.from(base64Data, 'base64');
         const docFinal = await PDFDocument.create();
 
         const docCert = await PDFDocument.load(certificadoPdfBytes);
@@ -221,38 +387,61 @@ async function mergeConTemario(certificadoPdfBytes, temarioBase64) {
         return Buffer.from(await docFinal.save());
     } catch (e) {
         console.error('Error al mergear temario:', e.message);
-        return certificadoPdfBytes; // si falla, devuelve solo el certificado
+        return certificadoPdfBytes;
     }
 }
 
+// ============================================================
+// NOMBRE DE ARCHIVO
+// ============================================================
+
 function nombreArchivoSeguro(nombre, codigo, prefijo = 'Certificado') {
-    const limpio = nombre.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s]/g, '').replace(/\s+/g, '_');
+    const limpio = nombre
+        .replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s]/g, '')
+        .replace(/\s+/g, '_');
+
     return `${prefijo}_${limpio}_${codigo}.pdf`;
 }
 
-// --- RUTAS ---
+// ============================================================
+// RUTAS
+// ============================================================
 
 app.get('/', (req, res) => {
     res.render('index', {
-        alumnos: [], cursoNombre: null, docenteNombre: null,
-        fechaInicio: null, fechaFin: null,
-        horasAcademicas: null, horasCronologicas: null,
-        cursoId: '', total: 0
+        alumnos: [],
+        cursoNombre: null,
+        docenteNombre: null,
+        fechaInicio: null,
+        fechaFin: null,
+        horasAcademicas: null,
+        horasCronologicas: null,
+        cursoId: '',
+        total: 0
     });
 });
 
 app.post('/buscar', async (req, res) => {
     const { cursoId } = req.body;
+
     try {
-        const resCurso = await axios.get(`${DOMINIO}/api/v3/courses/${cursoId}?api_key=${API_KEY}`);
+        const resCurso = await axios.get(
+            `${DOMINIO}/api/v3/courses/${cursoId}?api_key=${API_KEY}`
+        );
         const c = resCurso.data;
 
         let nombreDocente = "POR ASIGNAR";
+
         try {
-            const resIns = await axios.get(`${DOMINIO}/api/v3/courses/${cursoId}/instructors?api_key=${API_KEY}`);
+            const resIns = await axios.get(
+                `${DOMINIO}/api/v3/courses/${cursoId}/instructors?api_key=${API_KEY}`
+            );
+
             if (resIns.data && resIns.data.length > 0) {
                 const teacher = resIns.data.find(i => i.coinstructor === false) || resIns.data[0];
-                const resUser = await axios.get(`${DOMINIO}/api/v3/users/${teacher.user_id}?api_key=${API_KEY}`);
+                const resUser = await axios.get(
+                    `${DOMINIO}/api/v3/users/${teacher.user_id}?api_key=${API_KEY}`
+                );
                 nombreDocente = `${resUser.data.first_name} ${resUser.data.last_name}`.toUpperCase();
             }
         } catch (_) { }
@@ -266,11 +455,14 @@ app.post('/buscar', async (req, res) => {
             const resAlu = await axios.get(
                 `${DOMINIO}/api/v3/courses/${cursoId}/learners?api_key=${API_KEY}&$include=user&$limit=${limit}&$offset=${offset}`
             );
+
             if (resAlu.data && resAlu.data.length > 0) {
                 const listaMapeada = resAlu.data.map(item => ({
                     nombre: `${item.user.last_name} ${item.user.first_name}`.toUpperCase()
                 }));
+
                 todosLosAlumnos = todosLosAlumnos.concat(listaMapeada);
+
                 if (resAlu.data.length < limit) {
                     hayMasPags = false;
                 } else {
@@ -282,6 +474,7 @@ app.post('/buscar', async (req, res) => {
         }
 
         todosLosAlumnos.sort((a, b) => a.nombre.localeCompare(b.nombre));
+
         const alumnosFinal = todosLosAlumnos.map((alu, i) => ({
             ...alu,
             codigo: `NH-${cursoId}-${(i + 1).toString().padStart(3, '0')}`
@@ -298,6 +491,7 @@ app.post('/buscar', async (req, res) => {
             cursoId,
             total: alumnosFinal.length
         });
+
     } catch (e) {
         console.error(e.message);
         res.status(500).send("Error al buscar el curso. Verifica el ID.");
@@ -308,10 +502,18 @@ app.post('/api/generar-pdf-individual', async (req, res) => {
     try {
         const datos = req.body;
         const html = await renderizarCertificado(app, datos);
+
         let pdf = await generarPDF(html, 'landscape');
         pdf = await mergeConTemario(pdf, datos.temarioPDF || null);
-        const archivo = nombreArchivoSeguro(datos.nombre, datos.codigo, 'Certificado');
+
+        const archivo = nombreArchivoSeguro(
+            datos.nombre,
+            datos.codigo,
+            'Certificado'
+        );
+
         await fs.writeFile(path.join(CARPETA_CERTIFICADOS, archivo), pdf);
+
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename="${archivo}"`);
         res.send(pdf);
@@ -321,14 +523,50 @@ app.post('/api/generar-pdf-individual', async (req, res) => {
     }
 });
 
+app.post('/api/generar-pdf-individual-pdu', async (req, res) => {
+    try {
+        const datos = req.body;
+        datos.pdu = datos.pdu || "";
+        datos.codigoPDU = datos.codigoPDU || "";
+
+        const html = await renderizarCertificadoPDU(app, datos);
+
+        let pdf = await generarPDF(html, 'landscape');
+        pdf = await mergeConTemario(pdf, datos.temarioPDF || null);
+
+        const archivo = nombreArchivoSeguro(
+            datos.nombre,
+            datos.codigo,
+            'CertificadoPDU'
+        );
+
+        await fs.writeFile(path.join(CARPETA_CERTIFICADOS, archivo), pdf);
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${archivo}"`);
+        res.send(pdf);
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ error: 'Error al generar certificado PDU: ' + e.message });
+    }
+});
+
 app.post('/api/generar-pdf-individual-constancia', async (req, res) => {
     try {
         const datos = req.body;
         const html = await renderizarConstancia(app, datos);
+
         let pdf = await generarPDF(html, 'portrait');
         pdf = await mergeConTemario(pdf, datos.temarioPDF || null);
-        const archivo = nombreArchivoSeguro(datos.nombre, datos.codigo, 'Constancia');
+
+        const archivo = nombreArchivoSeguro(
+            datos.nombre,
+            datos.codigo,
+            'Constancia'
+        );
+
         await fs.writeFile(path.join(CARPETA_CERTIFICADOS, archivo), pdf);
+
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename="${archivo}"`);
         res.send(pdf);
@@ -342,10 +580,18 @@ app.post('/api/generar-pdf-individual-cartaitil', async (req, res) => {
     try {
         const datos = req.body;
         const html = await renderizarCartaITIL(app, datos);
+
         let pdf = await generarPDF(html, 'portrait');
         pdf = await mergeConTemario(pdf, datos.temarioPDF || null);
-        const archivo = nombreArchivoSeguro(datos.nombre, datos.codigo, 'CartaITIL');
+
+        const archivo = nombreArchivoSeguro(
+            datos.nombre,
+            datos.codigo,
+            'CartaITIL'
+        );
+
         await fs.writeFile(path.join(CARPETA_CERTIFICADOS, archivo), pdf);
+
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename="${archivo}"`);
         res.send(pdf);
@@ -355,13 +601,30 @@ app.post('/api/generar-pdf-individual-cartaitil', async (req, res) => {
     }
 });
 
-// --- GENERAR LOTE (certificados o constancias) ---
 app.post('/api/generar-lote', async (req, res) => {
-    const { alumnos, cursoNombre, docenteNombre, fechaInicio, fechaFin, creditos, firmaManual, tipo, incluirQR, temarioPDF } = req.body;
-    if (!alumnos || alumnos.length === 0) return res.status(400).json({ error: 'Sin alumnos.' });
+    const {
+        alumnos,
+        cursoNombre,
+        docenteNombre,
+        fechaInicio,
+        fechaFin,
+        creditos,
+        firmaManual,
+        tipo,
+        incluirQR,
+        temarioPDF,
+        pdu,
+        codigoPDU
+    } = req.body;
+
+    if (!alumnos || alumnos.length === 0) {
+        return res.status(400).json({ error: 'Sin alumnos.' });
+    }
 
     const esConstancia = tipo === 'constancia';
     const esCartaITIL = tipo === 'cartaitil';
+    const esPDU = tipo === 'pdu';
+
     const resultados = [];
 
     for (const alumno of alumnos) {
@@ -375,81 +638,107 @@ app.post('/api/generar-lote', async (req, res) => {
                 fin: fechaFin,
                 creditos,
                 firmaManual: esConstancia ? "" : firmaManual,
-                incluirQR: incluirQR,
-                nota: alumno.nota || ""
+                incluirQR,
+                nota: alumno.nota || "",
+                pdu: esPDU ? (pdu || "") : "",
+                codigoPDU: esPDU ? (codigoPDU || "") : ""
             };
+
             const html = esCartaITIL
                 ? await renderizarCartaITIL(app, datos)
                 : esConstancia
                     ? await renderizarConstancia(app, datos)
-                    : await renderizarCertificado(app, datos);
-            let pdf = await generarPDF(html, (esConstancia || esCartaITIL) ? 'portrait' : 'landscape');
+                    : esPDU
+                        ? await renderizarCertificadoPDU(app, datos)
+                        : await renderizarCertificado(app, datos);
+
+            let pdf = await generarPDF(
+                html,
+                (esConstancia || esCartaITIL) ? 'portrait' : 'landscape'
+            );
+
             pdf = await mergeConTemario(pdf, temarioPDF || null);
-            const prefijo = esCartaITIL ? 'CartaITIL' : (esConstancia ? 'Constancia' : 'Certificado');
-            const archivo = nombreArchivoSeguro(alumno.nombre, alumno.codigo, prefijo);
+
+            const prefijo = esCartaITIL
+                ? 'CartaITIL'
+                : (esConstancia
+                    ? 'Constancia'
+                    : (esPDU ? 'CertificadoPDU' : 'Certificado'));
+
+            const archivo = nombreArchivoSeguro(
+                alumno.nombre,
+                alumno.codigo,
+                prefijo
+            );
+
             await fs.writeFile(path.join(CARPETA_CERTIFICADOS, archivo), pdf);
             resultados.push({ nombre: alumno.nombre, estado: 'ok' });
+
         } catch (e) {
+            console.error(`Error con ${alumno.nombre}:`, e);
             resultados.push({ nombre: alumno.nombre, estado: 'error' });
         }
     }
+
     res.json({ mensaje: "Proceso completado", resultados });
 });
 
-// --- SUBIR FIRMA ---
 const storage = multer.diskStorage({
     destination: (req, file, cb) => cb(null, 'public/images/'),
     filename: (req, file, cb) => {
-        const nombreDocente = req.body.nombreDocenteFirma.replace(/\s+/g, '_').toUpperCase();
+        const nombreDocente = req.body.nombreDocenteFirma
+            .replace(/\s+/g, '_')
+            .toUpperCase();
         const extension = path.extname(file.originalname).toLowerCase();
         cb(null, `firma_${nombreDocente}${extension}`);
     }
 });
+
 const upload = multer({ storage });
 
 app.post('/api/subir-firma', upload.single('archivoFirma'), (req, res) => {
-    if (!req.file) return res.status(400).send('No se subió archivo.');
-    res.send(`<script>alert("Firma guardada en servidor"); window.location.href="/";</script>`);
+    if (!req.file) {
+        return res.status(400).send('No se subió archivo.');
+    }
+
+    res.send(`
+        <script>
+            alert("Firma guardada en servidor");
+            window.location.href="/";
+        </script>
+    `);
 });
 
-// --- RUTA CORREGIDA PARA CARGAR DATOS DEL CURSO ---
 app.get('/api/clase/:id', async (req, res) => {
     const cursoId = req.params.id;
-    try {
-        // Cambiado de /classes/ a /courses/ según tu prueba exitosa en Postman
-        const url = `${DOMINIO}/api/v3/courses/${cursoId}?api_key=${API_KEY}`;
-        console.log("Consultando a:", url); // Esto te servirá para ver la URL en la terminal
 
+    try {
+        const url = `${DOMINIO}/api/v3/courses/${cursoId}?api_key=${API_KEY}`;
+        console.log("Consultando a:", url);
         const respuesta = await axios.get(url);
 
         if (respuesta.data) {
-            // Enviamos los datos al frontend (index.ejs)
             res.json(respuesta.data);
         } else {
             res.status(404).json({ error: "No se encontró el curso" });
         }
     } catch (e) {
-        // Imprime el error real en la terminal de VS Code para debuguear
         console.error("Error al obtener curso:", e.response ? e.response.data : e.message);
         res.status(500).json({ error: "Error al conectar con la API de Matrix" });
     }
 });
 
-// --- ALTERNATIVA: USANDO POST COMO TÚNEL PARA PUT ---
 app.patch('/api/clase/:id/short-description', async (req, res) => {
     const cursoId = req.params.id;
     const { short_description } = req.body;
 
     try {
         const url = `${DOMINIO}/api/v3/courses/${cursoId}?api_key=${API_KEY}`;
-
-        const respuesta = await axios.patch(url, {
-            short_description: short_description
-        }, {
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
+        await axios.patch(
+            url,
+            { short_description },
+            { headers: { 'Content-Type': 'application/json' } }
+        );
 
         res.json({ mensaje: "Actualizado con éxito mediante túnel" });
     } catch (e) {
@@ -460,6 +749,7 @@ app.patch('/api/clase/:id/short-description', async (req, res) => {
         });
     }
 });
+
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Servidor Shukita v2 disponible en puerto ${PORT}`);
 });

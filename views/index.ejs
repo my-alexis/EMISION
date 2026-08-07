@@ -166,20 +166,16 @@
             border-color: #2e7d32;
         }
 
-        .tipo-badge-certificado {
-            background: #1a237e;
+        .tipo-selector .btn-check:checked+.btn-outline-info {
+            background-color: #0288d1;
             color: white;
+            border-color: #0288d1;
         }
 
-        .tipo-badge-constancia {
-            background: #e67e22;
-            color: white;
-        }
-
-        .tipo-badge-cartaitil {
-            background: #2e7d32;
-            color: white;
-        }
+        .tipo-badge-certificado { background: #1a237e; color: white; }
+        .tipo-badge-constancia { background: #e67e22; color: white; }
+        .tipo-badge-cartaitil { background: #2e7d32; color: white; }
+        .tipo-badge-pdu { background: #0288d1; color: white; }
 
         /* ── CONFIG CLASE ── */
         .config-header {
@@ -376,26 +372,33 @@
                             <div class="col-md-6">
                                 <h6 class="fw-bold mb-3"><i class="bi bi-file-earmark-text me-2"></i>Tipo de documento
                                 </h6>
-                                <div class="tipo-selector d-flex gap-3">
+                                <div class="tipo-selector d-flex gap-2 flex-wrap">
                                     <div>
                                         <input type="radio" class="btn-check" name="tipoDoc" id="tipoCertificado"
                                             value="certificado" checked>
-                                        <label class="btn btn-outline-primary px-4" for="tipoCertificado">
-                                            <i class="bi bi-award-fill me-2"></i>Certificado
+                                        <label class="btn btn-outline-primary px-3" for="tipoCertificado">
+                                            <i class="bi bi-award-fill me-1"></i>Certificado
                                         </label>
                                     </div>
                                     <div>
                                         <input type="radio" class="btn-check" name="tipoDoc" id="tipoConstancia"
                                             value="constancia">
-                                        <label class="btn btn-outline-warning px-4" for="tipoConstancia">
-                                            <i class="bi bi-file-earmark-check-fill me-2"></i>Constancia
+                                        <label class="btn btn-outline-warning px-3" for="tipoConstancia">
+                                            <i class="bi bi-file-earmark-check-fill me-1"></i>Constancia
                                         </label>
                                     </div>
                                     <div>
                                         <input type="radio" class="btn-check" name="tipoDoc" id="tipoCartaITIL"
                                             value="cartaitil">
-                                        <label class="btn btn-outline-success px-4" for="tipoCartaITIL">
-                                            <i class="bi bi-patch-check-fill me-2"></i>Carta ITIL
+                                        <label class="btn btn-outline-success px-3" for="tipoCartaITIL">
+                                            <i class="bi bi-patch-check-fill me-1"></i>Carta ITIL
+                                        </label>
+                                    </div>
+                                    <div>
+                                        <input type="radio" class="btn-check" name="tipoDoc" id="tipoPDU"
+                                            value="pdu">
+                                        <label class="btn btn-outline-info px-3" for="tipoPDU">
+                                            <i class="bi bi-award me-1"></i>Certificado PDUs
                                         </label>
                                     </div>
                                 </div>
@@ -404,7 +407,20 @@
                                     La <strong>Constancia</strong> usa el instructor registrado en texto (sin imagen de
                                     firma).
                                 </div>
+
+                                <!-- CAMPOS PDU -->
+                                <div id="seccionCamposPDU" class="mt-3 row g-2 d-none">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold small">Cantidad de PDUs</label>
+                                        <input type="text" id="inputPDU" class="form-control form-control-sm" placeholder="Ej: 6,5">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold small">Código PDU (único)</label>
+                                        <input type="text" id="inputCodigoPDU" class="form-control form-control-sm" placeholder="Ej: 3153VX4KBZ">
+                                    </div>
+                                </div>
                             </div>
+
                             <div class="col-md-6">
                                 <h6 class="fw-bold mb-3"><i class="bi bi-clock-history me-2"></i>Tipo de horas a
                                     imprimir</h6>
@@ -452,10 +468,7 @@
                                     <input class="form-check-input" type="checkbox" id="checkQR" name="incluirQR">
                                     <label class="form-check-label" for="checkQR">Incluir código QR global</label>
                                 </div>
-
                             </div>
-
-
                         </div>
                     </div>
                 </div>
@@ -513,8 +526,6 @@
                         </div>
                     </div>
                 </div>
-
-
 
                 <!-- TABLA ALUMNOS -->
                 <div class="card shadow-sm">
@@ -635,18 +646,34 @@
                     <div class="row g-4">
                         <div class="col-md-6">
                             <h6 class="fw-bold mb-3">Tipo de documento</h6>
-                            <div class="tipo-selector d-flex gap-3">
+                            <div class="tipo-selector d-flex gap-2 flex-wrap">
                                 <div>
                                     <input type="radio" class="btn-check" name="manTipoDoc" id="manTipoCert" value="certificado" checked onchange="manToggleTipo()">
-                                    <label class="btn btn-outline-primary px-4" for="manTipoCert"><i class="bi bi-award-fill me-2"></i>Certificado</label>
+                                    <label class="btn btn-outline-primary px-3" for="manTipoCert"><i class="bi bi-award-fill me-1"></i>Certificado</label>
                                 </div>
                                 <div>
                                     <input type="radio" class="btn-check" name="manTipoDoc" id="manTipoCons" value="constancia" onchange="manToggleTipo()">
-                                    <label class="btn btn-outline-warning px-4" for="manTipoCons"><i class="bi bi-file-earmark-check-fill me-2"></i>Constancia</label>
+                                    <label class="btn btn-outline-warning px-3" for="manTipoCons"><i class="bi bi-file-earmark-check-fill me-1"></i>Constancia</label>
                                 </div>
                                 <div>
                                     <input type="radio" class="btn-check" name="manTipoDoc" id="manTipoCartaITIL" value="cartaitil" onchange="manToggleTipo()">
-                                    <label class="btn btn-outline-success px-4" for="manTipoCartaITIL"><i class="bi bi-patch-check-fill me-2"></i>Carta ITIL</label>
+                                    <label class="btn btn-outline-success px-3" for="manTipoCartaITIL"><i class="bi bi-patch-check-fill me-1"></i>Carta ITIL</label>
+                                </div>
+                                <div>
+                                    <input type="radio" class="btn-check" name="manTipoDoc" id="manTipoPDU" value="pdu" onchange="manToggleTipo()">
+                                    <label class="btn btn-outline-info px-3" for="manTipoPDU"><i class="bi bi-award me-1"></i>Certificado PDUs</label>
+                                </div>
+                            </div>
+
+                            <!-- CAMPOS PDU CLASE MANUAL -->
+                            <div id="manSeccionCamposPDU" class="mt-3 row g-2 d-none">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Cantidad de PDUs</label>
+                                    <input type="text" id="manInputPDU" class="form-control form-control-sm" placeholder="Ej: 6,5">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Código PDU (único)</label>
+                                    <input type="text" id="manInputCodigoPDU" class="form-control form-control-sm" placeholder="Ej: 3153VX4KBZ">
                                 </div>
                             </div>
                         </div>
@@ -969,7 +996,7 @@
         }
 
         // ══════════════════════════════════════════════════
-        //  CERTIFICACIONES (código original)
+        //  CERTIFICACIONES
         // ══════════════════════════════════════════════════
         const CURSO_DATA = {
             cursoNombre: "<%= cursoNombre %>",
@@ -1000,29 +1027,31 @@
             return document.getElementById('horasAcademicasRadio').checked ? 'académicas' : 'cronológicas';
         }
 
-        // Mapa de endpoints por tipo de documento (certificaciones)
         const ENDPOINTS_TIPO = {
             certificado: '/api/generar-pdf-individual',
             constancia: '/api/generar-pdf-individual-constancia',
-            cartaitil: '/api/generar-pdf-individual-cartaitil'
+            cartaitil: '/api/generar-pdf-individual-cartaitil',
+            pdu: '/api/generar-pdf-individual-pdu'
         };
         const PREFIJOS_TIPO = {
             certificado: 'Certificado',
             constancia: 'Constancia',
-            cartaitil: 'CartaITIL'
+            cartaitil: 'CartaITIL',
+            pdu: 'CertificadoPDU'
         };
         const BADGES_TIPO = {
             certificado: { texto: 'CERTIFICADO', clase: 'badge tipo-badge-certificado rounded-pill px-3' },
             constancia: { texto: 'CONSTANCIA', clase: 'badge tipo-badge-constancia rounded-pill px-3' },
-            cartaitil: { texto: 'CARTA ITIL', clase: 'badge tipo-badge-cartaitil rounded-pill px-3' }
+            cartaitil: { texto: 'CARTA ITIL', clase: 'badge tipo-badge-cartaitil rounded-pill px-3' },
+            pdu: { texto: 'CERTIFICADO PDUs', clase: 'badge tipo-badge-pdu rounded-pill px-3' }
         };
 
         document.querySelectorAll('input[name="tipoDoc"]').forEach(radio => {
             radio.addEventListener('change', () => {
                 const tipo = getTipoDocumento();
-                // La firma solo aplica a Certificado; Constancia y Carta ITIL no la usan
-                document.getElementById('seccionFirma').style.display = tipo === 'certificado' ? 'block' : 'none';
+                document.getElementById('seccionFirma').style.display = (tipo === 'certificado' || tipo === 'pdu') ? 'block' : 'none';
                 document.getElementById('notaConstancia').classList.toggle('d-none', tipo !== 'constancia');
+                document.getElementById('seccionCamposPDU').classList.toggle('d-none', tipo !== 'pdu');
                 const badge = document.getElementById('tipoBadge');
                 const info = BADGES_TIPO[tipo];
                 badge.textContent = info.texto;
@@ -1054,7 +1083,7 @@
                 isChecked ? "info" : "warning");
         }
 
-        // ── TEMARIO (sección Matrix) ──────────────────────────
+        // ── TEMARIO (sección Matrix) ──
         let TEMARIO_BASE64 = null;
 
         function toggleTemarioVisibilidad() {
@@ -1070,7 +1099,6 @@
             reader.onload = async e => {
                 TEMARIO_BASE64 = e.target.result;
                 document.getElementById('temarioNombre').textContent = file.name;
-                // Contar páginas con pdf-lib en cliente (usa PDF.js desde CDN)
                 try {
                     const arrayBuf = await file.arrayBuffer();
                     const { PDFDocument } = await import('https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/+esm');
@@ -1096,7 +1124,7 @@
             setBadge(fila, 'procesando');
             const tipo = getTipoDocumento();
             const incluirFirma = document.getElementById('switchIncluirFirma').checked;
-            const firmaAEnviar = (tipo === 'certificado' && incluirFirma) ? FIRMA_BASE64 : "";
+            const firmaAEnviar = ((tipo === 'certificado' || tipo === 'pdu') && incluirFirma) ? FIRMA_BASE64 : "";
             const incluirQR = document.getElementById('checkQR').checked;
             const payload = {
                 ...datos,
@@ -1106,7 +1134,9 @@
                 tipo,
                 fechaEmision: getFechaEmision(),
                 incluirQR: incluirQR,
-                temarioPDF: TEMARIO_BASE64 || null
+                temarioPDF: TEMARIO_BASE64 || null,
+                pdu: tipo === 'pdu' ? document.getElementById('inputPDU').value : '',
+                codigoPDU: tipo === 'pdu' ? document.getElementById('inputCodigoPDU').value : ''
             };
             const endpoint = ENDPOINTS_TIPO[tipo];
             try {
@@ -1162,7 +1192,7 @@
             const checks = document.querySelectorAll('.alumno-check:checked');
             if (checks.length === 0) { mostrarToast('Selecciona al menos un alumno.', 'warning'); return; }
             const tipo = getTipoDocumento();
-            const labelMap = { certificado: 'certificado(s)', constancia: 'constancia(s)', cartaitil: 'carta(s) ITIL' };
+            const labelMap = { certificado: 'certificado(s)', constancia: 'constancia(s)', cartaitil: 'carta(s) ITIL', pdu: 'certificado(s) PDUs' };
             const label = labelMap[tipo];
             if (!confirm(`¿Generar ${checks.length} ${label}?`)) return;
             for (const check of checks) {
@@ -1241,7 +1271,6 @@
             return fecha.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
         }
 
-
         // ══════════════════════════════════════════════════
         //  CONFIGURACIÓN CLASE
         // ══════════════════════════════════════════════════
@@ -1265,7 +1294,6 @@
                 return;
             }
 
-            // Rellenar UI
             document.getElementById('cfgNombreClase').innerHTML =
                 `<i class="bi bi-mortarboard-fill me-2"></i>${cfgClaseData.name}`;
 
@@ -1282,7 +1310,6 @@
             document.getElementById('statusDesc').textContent = 'Sin cambios';
             document.getElementById('statusDesc').className = 'badge bg-secondary api-status-badge';
 
-            // Pre-rellenar fecha de inicio en el generador de sesiones
             if (cfgClaseData.start_at) {
                 document.getElementById('sesionFechaInicio').value = cfgClaseData.start_at;
             }
@@ -1330,7 +1357,7 @@
             mostrarToast('Descripción restaurada al original', 'info');
         }
 
-        // ── Generador de Sesiones ──────────────────────────
+        // ── Generador de Sesiones ──
         const DIAS_ES = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
         const MESES_ES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
 
@@ -1338,15 +1365,9 @@
             return Array.from(document.querySelectorAll('#diasSemana .btn-check:checked'))
                 .map(c => parseInt(c.value))
                 .sort((a, b) => {
-                    // Ordenar: lunes(1)..sábado(6)..domingo(0)
                     const order = [1, 2, 3, 4, 5, 6, 0];
                     return order.indexOf(a) - order.indexOf(b);
                 });
-        }
-
-        function formatearHora(timeStr) {
-            // timeStr = "19:30" → "19:30"
-            return timeStr;
         }
 
         function generarSesiones() {
@@ -1363,22 +1384,14 @@
             let current = new Date(y, m - 1, d);
             let count = 0;
 
-            // El bucle continuará hasta que hayamos encontrado la cantidad de sesiones solicitadas
             while (count < cantidad) {
-                const dow = current.getDay(); // 0=dom, 1=lun...
-
-                // 1. Verificamos si el día de la semana coincide con la frecuencia seleccionada
+                const dow = current.getDay();
                 if (dias.includes(dow)) {
-
-                    // 2. ¡MODIFICACIÓN AQUÍ!: Verificamos si NO es feriado
                     if (!esFeriado(current)) {
                         sesiones.push(new Date(current));
                         count++;
                     }
-                    // Si es feriado, el código simplemente ignora este día y no aumenta el contador 'count'
                 }
-
-                // Avanzamos al siguiente día calendario
                 current.setDate(current.getDate() + 1);
             }
 
@@ -1417,7 +1430,6 @@
             const texto = getSesionesTexto();
             if (!texto) { mostrarToast('Genera las sesiones primero', 'warning'); return; }
             const ta = document.getElementById('inputShortDesc');
-            // Reemplazar bloque de sesiones si existe, o insertar al inicio
             const existente = ta.value;
             const regexSesiones = /Horarios de las sesiones[\s\S]*?(?=\r?\n\r?\n[A-Z]|$)/i;
             if (regexSesiones.test(existente)) {
@@ -1437,21 +1449,9 @@
         }
 
         const FERIADOS_PERU = [
-            '01-01', // Año Nuevo
-            '04-17', // Jueves Santo (Variable, ejemplo 2025/2026)
-            '04-18', // Viernes Santo
-            '05-01', // Día del Trabajo
-            '06-07', // Batalla de Arica
-            '06-29', // San Pedro y San Pablo
-            '07-28', // Fiestas Patrias
-            '07-29', // Fiestas Patrias
-            '08-06', // Batalla de Junín
-            '08-30', // Santa Rosa de Lima
-            '10-08', // Combate de Angamos
-            '11-01', // Todos los Santos
-            '12-08', // Inmaculada Concepción
-            '12-09', // Batalla de Ayacucho
-            '12-25'  // Navidad
+            '01-01', '04-17', '04-18', '05-01', '06-07', '06-29',
+            '07-28', '07-29', '08-06', '08-30', '10-08', '11-01',
+            '12-08', '12-09', '12-25'
         ];
 
         function esFeriado(fecha) {
@@ -1461,11 +1461,9 @@
         }
 
         // ══════════════════════════════════════════════════════
-        //  CLASE MANUAL — lógica completa
+        //  CLASE MANUAL
         // ══════════════════════════════════════════════════════
-
-        let manAlumnos = [];   // [{nombre, codigo, estado}]
-
+        let manAlumnos = [];
         const MESES_LARGO = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 
         function manFechaISO_a_Texto(isoStr) {
@@ -1482,11 +1480,11 @@
         }
 
         function manToggleTipo() {
-            // La firma solo aplica a Certificado; Constancia y Carta ITIL no la usan
             const tipo = document.querySelector('input[name="manTipoDoc"]:checked').value;
-            const usaFirma = tipo === 'certificado';
+            const usaFirma = tipo === 'certificado' || tipo === 'pdu';
             document.getElementById('manSeccionFirma').style.opacity = usaFirma ? '1' : '0.4';
             document.getElementById('manSeccionFirma').style.pointerEvents = usaFirma ? '' : 'none';
+            document.getElementById('manSeccionCamposPDU').classList.toggle('d-none', tipo !== 'pdu');
         }
 
         function manToggleFirmaVis() {
@@ -1507,7 +1505,7 @@
             reader.readAsDataURL(file);
         }
 
-        // ── TEMARIO (Clase Manual) ──────────────────────────
+        // ── TEMARIO (Clase Manual) ──
         let MAN_TEMARIO_BASE64 = null;
 
         function manToggleTemario() {
@@ -1673,8 +1671,7 @@
         async function manGetFirmaBase64() {
             const incluirFirma = document.getElementById('manSwitchFirma').checked;
             const tipo = document.querySelector('input[name="manTipoDoc"]:checked').value;
-            // La firma solo se envía en Certificado
-            if (!incluirFirma || tipo !== 'certificado') return '';
+            if (!incluirFirma || (tipo !== 'certificado' && tipo !== 'pdu')) return '';
             const file = document.getElementById('manInputFirma').files[0];
             if (!file) return '';
             return new Promise(resolve => {
@@ -1711,7 +1708,9 @@
                         incluirQR: base.incluirQR,
                         fechaEmision: base.fechaEmision,
                         temarioPDF: MAN_TEMARIO_BASE64 || null,
-                        nota: alumno.nota || ''
+                        nota: alumno.nota || '',
+                        pdu: base.tipo === 'pdu' ? document.getElementById('manInputPDU').value : '',
+                        codigoPDU: base.tipo === 'pdu' ? document.getElementById('manInputCodigoPDU').value : ''
                     })
                 });
                 if (!res.ok) throw new Error(await res.text());
@@ -1763,7 +1762,9 @@
                             incluirQR: base.incluirQR,
                             fechaEmision: base.fechaEmision,
                             temarioPDF: MAN_TEMARIO_BASE64 || null,
-                            nota: alumno.nota || ''
+                            nota: alumno.nota || '',
+                            pdu: base.tipo === 'pdu' ? document.getElementById('manInputPDU').value : '',
+                            codigoPDU: base.tipo === 'pdu' ? document.getElementById('manInputCodigoPDU').value : ''
                         })
                     });
                     if (!res.ok) throw new Error(await res.text());
@@ -1781,7 +1782,7 @@
                     mostrarToast(`Error con ${alumno.nombre}: ` + e.message, 'danger');
                 }
                 manRenderTabla();
-                await new Promise(r => setTimeout(r, 400)); // pausa entre PDFs para no saturar el browser
+                await new Promise(r => setTimeout(r, 400));
             }
             mostrarToast('¡Proceso completado!', 'success');
         }

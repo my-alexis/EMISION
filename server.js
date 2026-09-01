@@ -16,11 +16,15 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// --- CONFIGURACIÓN ---
-const API_KEY = '4ea187998ed58eb48fae278a457fc57f023eb5277de7139943b6';
-const DOMINIO = 'https://newhorizonsperu.matrixlms.com';
-const CARPETA_CERTIFICADOS = path.join(__dirname, 'certificados_generados');
+// --- CONFIGURACIÓN MOODLE ---
+// Define MOODLE_URL y MOODLE_TOKEN en tu archivo .env (nunca los dejes escritos en el código).
+// MOODLE_URL=https://campus.newhorizons.edu.pe
+// MOODLE_TOKEN=2eac31943fb1c4c775c2c0009fbcc3ef
+const MOODLE_URL = (process.env.MOODLE_URL || '').replace(/\/+$/, '');
+const MOODLE_TOKEN = process.env.MOODLE_TOKEN || '';
+const MOODLE_ENDPOINT = `${MOODLE_URL}/webservice/rest/server.php`;
 
+const CARPETA_CERTIFICADOS = path.join(__dirname, 'certificados_generados');
 const QR_GLOBAL_PATH = path.join(__dirname, 'public/images/codeqr.png');
 
 if (!fsSync.existsSync(CARPETA_CERTIFICADOS)) {
@@ -30,7 +34,47 @@ if (!fsSync.existsSync(path.join(__dirname, 'public/images'))) {
     fsSync.mkdirSync(path.join(__dirname, 'public/images'), { recursive: true });
 }
 
-// --- UTILIDADES ---
+// --- UTILIDADES MOODLE ---
+
+// Convierte objetos anidados/arrays en la notación de corchetes que exige el REST de Moodle.
+// Ej: { options: { ids: [123] } } => { "options[ids][0]": 123 }
+function aplanarParametrosMoodle(obj, prefijo = '') {
+    let params = {};
+    for (const key in obj) {
+        const valor = obj[key];
+        const nuevaClave = prefijo ? `${prefijo}[${key}]` : key;
+        if (valor !== null && typeof valor === 'object') {
+            Object.assign(params, aplanarParametrosMoodle(valor, nuevaClave));
+        } else if (valor !== undefined) {
+            params[nuevaClave] = valor;
+        }
+    }
+    return params;
+}
+
+// Llama a cualquier función del Web Service de Moodle (moodlewsrestformat=json)
+async function moodleCall(wsfunction, params = {}) {
+    if (!MOODLE_URL || !MOODLE_TOKEN) {
+        throw new Error('MOODLE_URL o MOODLE_TOKEN no están configurados en el .env');
+    }
+    const parametrosFinales = aplanarParametrosMoodle({
+        wstoken: MOODLE_TOKEN,
+        wsfunction,
+        moodlewsrestformat: 'json',
+        ...params
+    });
+    const { data } = await axios.get(MOODLE_ENDPOINT, { params: parametrosFinales });
+
+    // Moodle responde 200 OK incluso en errores; el error viene dentro del JSON.
+    if (data && data.exception) {
+        const err = new Error(data.message || data.exception);
+        err.moodleError = data;
+        throw err;
+    }
+    return data;
+}
+
+// --- UTILIDADES GENERALES ---
 const getImagenBase64 = (nombreArchivo) => {
     try {
         const ruta = path.join(process.cwd(), 'public/images', nombreArchivo);
@@ -44,9 +88,23 @@ const getImagenBase64 = (nombreArchivo) => {
     return "";
 };
 
+// Formatea una fecha ISO (usada por los formularios/manual)
 const formatearFecha = (fechaISO) => {
     if (!fechaISO || fechaISO === "No definida") return "---";
     const fecha = new Date(fechaISO);
+    return new Intl.DateTimeFormat('es-PE', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+        timeZone: 'UTC'
+    }).format(fecha);
+};
+
+// Formatea un timestamp UNIX (segundos), tal como los devuelve la API de Moodle
+// (startdate / enddate de core_course_get_courses)
+const formatearFechaUnix = (timestampSegundos) => {
+    if (!timestampSegundos) return "---";
+    const fecha = new Date(timestampSegundos * 1000);
     return new Intl.DateTimeFormat('es-PE', {
         day: 'numeric',
         month: 'long',
@@ -64,7 +122,7 @@ const getFechaHoy = () => {
     }).format(new Date());
 };
 
-function renderizarCertificado(app, datos) {   // ← quita el parámetro req
+function renderizarCertificado(app, datos) {
     const logoSrc = getImagenBase64('logoNH.png');
     const firmaFijaSrc = getImagenBase64('firma_juan.png');
     const fondoPath = path.join(__dirname, 'public', 'images', 'fondo_certificado.png');
@@ -73,10 +131,8 @@ function renderizarCertificado(app, datos) {   // ← quita el parámetro req
 
     // --- LÓGICA PARA EL QR GLOBAL ---
     let qrSrc = "";
-    // Verificamos si en los datos viene la instrucción de incluir QR
     if (datos.incluirQR === 'on' || datos.incluirQR === 'true' || datos.incluirQR === true) {
         try {
-            // Usamos el nombre del archivo que subiste
             const qrPath = path.join(__dirname, 'public', 'images', 'codeqr.png');
             const qrBase64 = fsSync.readFileSync(qrPath, { encoding: 'base64' });
             qrSrc = `data:image/png;base64,${qrBase64}`;
@@ -100,7 +156,7 @@ function renderizarCertificado(app, datos) {   // ← quita el parámetro req
             fondoSrc,
             qrSrc: qrSrc,
             firmaDocenteSrc: datos.firmaManual || "",
-            fechaEmision: datos.fechaEmision || getFechaHoy(),  // ← lee de datos, no de req
+            fechaEmision: datos.fechaEmision || getFechaHoy(),
             nota: datos.nota || ""
         }, (err, html) => {
             if (err) return reject(err);
@@ -122,7 +178,6 @@ function renderizarConstancia(app, datos) {
     const fondoBase64 = fsSync.readFileSync(fondoPath, { encoding: 'base64' });
     const fondoSrc = `data:image/png;base64,${fondoBase64}`;
 
-    // ← Fuente embebida en base64 para Puppeteer
     const fontPath = path.join(__dirname, 'public', 'fonts', 'DancingScript[wght].ttf');
     const fontBase64 = fsSync.readFileSync(fontPath, { encoding: 'base64' });
     const fontSrc = `data:font/truetype;base64,${fontBase64}`;
@@ -139,7 +194,7 @@ function renderizarConstancia(app, datos) {
             codigoNH: datos.codigo,
             firmaFijaSrc,
             fondoSrc,
-            fontSrc, // ← agrega esto
+            fontSrc,
             firmaDocenteSrc: datos.firmaManual || "",
             fechaEmision: datos.fechaEmision || getFechaHoy()
         }, (err, html) => {
@@ -179,7 +234,6 @@ function renderizarCartaITIL(app, datos) {
     });
 }
 
-
 // --- GENERACIÓN DE PDF CON PUPPETEER ---
 async function generarPDF(html, orientacion = 'landscape') {
     const browser = await puppeteer.launch({
@@ -204,7 +258,6 @@ async function generarPDF(html, orientacion = 'landscape') {
 async function mergeConTemario(certificadoPdfBytes, temarioBase64) {
     if (!temarioBase64) return certificadoPdfBytes;
     try {
-        // temarioBase64 puede venir con o sin el prefijo data:application/pdf;base64,
         const base64Data = temarioBase64.includes(',') ? temarioBase64.split(',')[1] : temarioBase64;
         const temarioBytes = Buffer.from(base64Data, 'base64');
 
@@ -221,7 +274,7 @@ async function mergeConTemario(certificadoPdfBytes, temarioBase64) {
         return Buffer.from(await docFinal.save());
     } catch (e) {
         console.error('Error al mergear temario:', e.message);
-        return certificadoPdfBytes; // si falla, devuelve solo el certificado
+        return certificadoPdfBytes;
     }
 }
 
@@ -241,45 +294,47 @@ app.get('/', (req, res) => {
     });
 });
 
+
 app.post('/buscar', async (req, res) => {
     const { cursoId } = req.body;
     try {
-        const resCurso = await axios.get(`${DOMINIO}/api/v3/courses/${cursoId}?api_key=${API_KEY}`);
-        const c = resCurso.data;
+        // 1) Obtener datos del curso
+        const cursos = await moodleCall('core_course_get_courses', {
+            options: { ids: [cursoId] }
+        });
+        if (!cursos || cursos.length === 0) {
+            throw new Error('No se encontró ningún curso con ese ID en Moodle');
+        }
+        const curso = cursos[0];
 
-        let nombreDocente = "POR ASIGNAR";
-        try {
-            const resIns = await axios.get(`${DOMINIO}/api/v3/courses/${cursoId}/instructors?api_key=${API_KEY}`);
-            if (resIns.data && resIns.data.length > 0) {
-                const teacher = resIns.data.find(i => i.coinstructor === false) || resIns.data[0];
-                const resUser = await axios.get(`${DOMINIO}/api/v3/users/${teacher.user_id}?api_key=${API_KEY}`);
-                nombreDocente = `${resUser.data.first_name} ${resUser.data.last_name}`.toUpperCase();
-            }
-        } catch (_) { }
-
-        let todosLosAlumnos = [];
-        let offset = 0;
-        const limit = 100;
-        let hayMasPags = true;
-
-        while (hayMasPags) {
-            const resAlu = await axios.get(
-                `${DOMINIO}/api/v3/courses/${cursoId}/learners?api_key=${API_KEY}&$include=user&$limit=${limit}&$offset=${offset}`
-            );
-            if (resAlu.data && resAlu.data.length > 0) {
-                const listaMapeada = resAlu.data.map(item => ({
-                    nombre: `${item.user.last_name} ${item.user.first_name}`.toUpperCase()
-                }));
-                todosLosAlumnos = todosLosAlumnos.concat(listaMapeada);
-                if (resAlu.data.length < limit) {
-                    hayMasPags = false;
-                } else {
-                    offset += limit;
-                }
-            } else {
-                hayMasPags = false;
+        // 2) Extraer Horas Cronológicas desde customfields (shortname: "hours")
+        let hCronologicas = 0;
+        if (Array.isArray(curso.customfields)) {
+            const fieldHours = curso.customfields.find(f => f.shortname === 'hours');
+            if (fieldHours && fieldHours.value) {
+                hCronologicas = parseFloat(fieldHours.value) || 0;
             }
         }
+
+        // 3) Calcular Horas Académicas: (Horas Cronológicas * 16) / 12
+        const hAcademicas = Math.round((hCronologicas * 16) / 12);
+
+        // 4) Usuarios matriculados (docentes + alumnos)
+        const usuarios = await moodleCall('core_enrol_get_enrolled_users', {
+            courseid: cursoId
+        });
+
+        const tieneRol = (usuario, shortnames) =>
+            Array.isArray(usuario.roles) && usuario.roles.some(r => shortnames.includes(r.shortname));
+
+        const docente = (usuarios || []).find(u => tieneRol(u, ['editingteacher', 'teacher']));
+        const nombreDocente = docente
+            ? `${docente.lastname} ${docente.firstname}`.toUpperCase()
+            : "POR ASIGNAR";
+
+        let todosLosAlumnos = (usuarios || [])
+            .filter(u => tieneRol(u, ['student']))
+            .map(u => ({ nombre: `${u.lastname} ${u.firstname}`.toUpperCase() }));
 
         todosLosAlumnos.sort((a, b) => a.nombre.localeCompare(b.nombre));
         const alumnosFinal = todosLosAlumnos.map((alu, i) => ({
@@ -289,20 +344,21 @@ app.post('/buscar', async (req, res) => {
 
         res.render('index', {
             alumnos: alumnosFinal,
-            cursoNombre: c.name,
+            cursoNombre: curso.fullname,
             docenteNombre: nombreDocente,
-            fechaInicio: formatearFecha(c.start_at),
-            fechaFin: formatearFecha(c.finish_at),
-            horasAcademicas: c.section_code || "0",
-            horasCronologicas: c.credits || "0",
+            fechaInicio: formatearFechaUnix(curso.startdate),
+            fechaFin: formatearFechaUnix(curso.enddate),
+            horasAcademicas: hAcademicas.toString(),
+            horasCronologicas: hCronologicas.toString(),
             cursoId,
             total: alumnosFinal.length
         });
     } catch (e) {
-        console.error(e.message);
-        res.status(500).send("Error al buscar el curso. Verifica el ID.");
+        console.error("Error al buscar el curso en Moodle:", e.moodleError || e.message);
+        res.status(500).send("Error al buscar el curso. Verifica el ID y la conexión con Moodle.");
     }
 });
+
 
 app.post('/api/generar-pdf-individual', async (req, res) => {
     try {
@@ -412,54 +468,6 @@ app.post('/api/subir-firma', upload.single('archivoFirma'), (req, res) => {
     res.send(`<script>alert("Firma guardada en servidor"); window.location.href="/";</script>`);
 });
 
-// --- RUTA CORREGIDA PARA CARGAR DATOS DEL CURSO ---
-app.get('/api/clase/:id', async (req, res) => {
-    const cursoId = req.params.id;
-    try {
-        // Cambiado de /classes/ a /courses/ según tu prueba exitosa en Postman
-        const url = `${DOMINIO}/api/v3/courses/${cursoId}?api_key=${API_KEY}`;
-        console.log("Consultando a:", url); // Esto te servirá para ver la URL en la terminal
-
-        const respuesta = await axios.get(url);
-
-        if (respuesta.data) {
-            // Enviamos los datos al frontend (index.ejs)
-            res.json(respuesta.data);
-        } else {
-            res.status(404).json({ error: "No se encontró el curso" });
-        }
-    } catch (e) {
-        // Imprime el error real en la terminal de VS Code para debuguear
-        console.error("Error al obtener curso:", e.response ? e.response.data : e.message);
-        res.status(500).json({ error: "Error al conectar con la API de Matrix" });
-    }
-});
-
-// --- ALTERNATIVA: USANDO POST COMO TÚNEL PARA PUT ---
-app.patch('/api/clase/:id/short-description', async (req, res) => {
-    const cursoId = req.params.id;
-    const { short_description } = req.body;
-
-    try {
-        const url = `${DOMINIO}/api/v3/courses/${cursoId}?api_key=${API_KEY}`;
-
-        const respuesta = await axios.patch(url, {
-            short_description: short_description
-        }, {
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-
-        res.json({ mensaje: "Actualizado con éxito mediante túnel" });
-    } catch (e) {
-        console.error("Error con alternativa POST:", e.response ? e.response.data : e.message);
-        res.status(500).json({
-            error: "La API sigue rechazando la actualización",
-            detalles: e.response ? e.response.data : e.message
-        });
-    }
-});
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Servidor Shukita v2 disponible en puerto ${PORT}`);
+    console.log(`🚀 Servidor Shukita v3 (Moodle) disponible en puerto ${PORT}`);
 });

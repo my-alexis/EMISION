@@ -2,7 +2,6 @@
 node_modules/
 
 # Variables de entorno (Contienen claves secretas)
-.env
 
 # Archivos generados localmente
 certificados_generados/

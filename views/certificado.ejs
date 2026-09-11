@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
         /* Configuración de página */
         @page {
             size: A4 landscape;
@@ -14,7 +15,7 @@
         body {
             margin: 0;
             padding: 0;
-            font-family: 'Poppins', sans-serif; 
+            font-family: 'Poppins', sans-serif;
             background-color: #ffffff;
             color: #333;
         }
@@ -197,7 +198,7 @@
         .code-label {
             font-size: 11px;
             color: #2c2a6b;
-      
+
         }
 
         .code-value {
@@ -213,16 +214,20 @@
 
         .qr-container {
             position: absolute;
-            bottom: 170px;
-            right: 100px;
+            /* Reducimos las distancias para subirlo y moverlo a la izquierda */
+            left: 310px;
+            /* Prueba entre 430px y 470px */
+            top: 578px;
+            /* Prueba entre 480px y 520px */
             text-align: center;
-            padding: 4px;
+            padding: 0;
             z-index: 3;
         }
 
         .qr-img {
-            width: 100px;
-            height: 100px;
+            width: 90px;
+            /* Tamaño más compacto para que encaje bien en el espacio */
+            height: 90px;
             display: block;
         }
 
@@ -250,59 +255,61 @@
             <img src="<%= firmaDocenteSrc %>" class="firma-docente-fija">
             <% } %>
                 <% if (qrSrc && qrSrc !=="" ) { %>
-            <div class="qr-container">
-                <img src="<%= qrSrc %>" class="qr-img">
-            </div>
-            <% } %>
-                <div class="top-bar">
-                    <div class="bar-navy"></div>
-                    <div class="bar-blue"></div>
-                    <div class="bar-orange"></div>
-                </div>
-
-                <div class="content">
-                    <br><br>
-                    <h1 class="main-title"></h1>
-                    <br><br>
-                    <!-- <div class="text-info">Otorgado a:</div> -->
-                    <br><br><br><br>
-                    <div class="text-info">Certifica a:</div>
-                    <br>
-                    <div class="student-name">
-                        <%= nombreAlumno %>
-                    </div>
-                    <br>
-                    <div class="text-info">por haber aprobado satisfactoriamente el curso de <strong><%= nombreCurso %></strong>, con una
-                            duración de 
-                                <%= creditos %>
-                            horas <%= tipoHoras %>.<br>
-                                Del <strong>
-                                    <%= inicio %>
-                                </strong> al <strong>
-                                    <%= fin %>
-                                </strong><br>
-
-                    </div>
-                </div>
-
-                <div class="footer-container">
-                    <div class="location-date">
-                        Lima, <%= fechaEmision %>
-                    </div>
-                </div>
-
-                <div class="cert-code cert-code-fija">
-                    <div class="code-value">
-                        <%= codigoNH %>
-                    </div>
-                </div>
-
-                <% if (typeof nota !=="undefined" && nota && nota !=="" ) { %>
-                    <div class="nota-container">
-                        <div class="nota-label">NOTA: <%= nota %>
-                        </div>
+                    <div class="qr-container">
+                        <img src="<%= qrSrc %>" class="qr-img">
                     </div>
                     <% } %>
+                        <div class="top-bar">
+                            <div class="bar-navy"></div>
+                            <div class="bar-blue"></div>
+                            <div class="bar-orange"></div>
+                        </div>
+
+                        <div class="content">
+                            <br><br>
+                            <h1 class="main-title"></h1>
+                            <br><br>
+                            <!-- <div class="text-info">Otorgado a:</div> -->
+                            <br><br><br><br>
+                            <div class="text-info">Certifica a:</div>
+                            <br>
+                            <div class="student-name">
+                                <%= nombreAlumno %>
+                            </div>
+                            <br>
+                            <div class="text-info">por haber aprobado satisfactoriamente el curso de <strong>
+                                    <%= nombreCurso %>
+                                </strong>, con una
+                                duración de
+                                <%= creditos %>
+                                    horas <%= tipoHoras %>.<br>
+                                        Del <strong>
+                                            <%= inicio %>
+                                        </strong> al <strong>
+                                            <%= fin %>
+                                        </strong><br>
+
+                            </div>
+                        </div>
+
+                        <div class="footer-container">
+                            <div class="location-date">
+                                Lima, <%= fechaEmision %>
+                            </div>
+                        </div>
+
+                        <div class="cert-code cert-code-fija">
+                            <div class="code-value">
+                                <%= codigoNH %>
+                            </div>
+                        </div>
+
+                        <% if (typeof nota !=="undefined" && nota && nota !=="" ) { %>
+                            <div class="nota-container">
+                                <div class="nota-label">NOTA: <%= nota %>
+                                </div>
+                            </div>
+                            <% } %>
     </div>
 
     <script>

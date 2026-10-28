@@ -490,6 +490,11 @@
                                     <input class="form-check-input" type="checkbox" id="checkQR" name="incluirQR">
                                     <label class="form-check-label" for="checkQR">Incluir código QR global</label>
                                 </div>
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" id="switchIncluirNota"
+                                        onchange="toggleColumnaNota()">
+                                    <label class="form-check-label" for="switchIncluirNota">Incluir nota</label>
+                                </div>
 
                             </div>
 
@@ -574,6 +579,7 @@
                                 </th>
                                 <th>CÓDIGO NH</th>
                                 <th>APELLIDOS Y NOMBRES</th>
+                                <th class="text-center col-nota d-none" width="90">NOTA</th>
                                 <th class="text-center" width="130">ESTADO</th>
                                 <th class="text-center" width="100">ACCIÓN</th>
                             </tr>
@@ -589,6 +595,10 @@
                                     <td><code class="fw-bold text-primary"><%= alu.codigo %></code></td>
                                     <td class="fw-semibold">
                                         <%= alu.nombre %>
+                                    </td>
+                                    <td class="text-center col-nota d-none">
+                                        <input type="text" class="form-control form-control-sm text-center alumno-nota"
+                                            style="min-width:70px" placeholder="—">
                                     </td>
                                     <td class="text-center">
                                         <span class="badge rounded-pill badge-pendiente status-badge">Pendiente</span>
@@ -993,8 +1003,12 @@
             const incluirFirma = document.getElementById('switchIncluirFirma').checked;
             const firmaAEnviar = (tipo === 'certificado' && incluirFirma) ? FIRMA_BASE64 : "";
             const incluirQR = document.getElementById('checkQR').checked;
+            const notaInput = fila.querySelector('.alumno-nota');
+            const notaAEnviar = (document.getElementById('switchIncluirNota').checked && notaInput)
+                ? notaInput.value.trim() : '';
             const payload = {
                 ...datos,
+                nota: notaAEnviar,
                 creditos: getCreditosSeleccionados(),
                 tipoHoras: getTipoHorasLabel(),
                 firmaManual: firmaAEnviar,
@@ -1024,6 +1038,11 @@
                 setBadge(fila, 'error');
                 mostrarToast('Error: ' + e.message, 'danger');
             }
+        }
+
+        function toggleColumnaNota() {
+            const on = document.getElementById('switchIncluirNota').checked;
+            document.querySelectorAll('.col-nota').forEach(el => el.classList.toggle('d-none', !on));
         }
 
         function toggleAll(src) {
